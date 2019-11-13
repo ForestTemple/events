@@ -1,0 +1,40 @@
+<!doctype html>
+<html>
+	<head>
+	<title>Events</title>
+	<link href="{{url_for('static', filename='css/main.css')}}" rel="stylesheet" type="text/css" media="all">
+	{% block css %}
+	{% endblock %}
+	</head>
+
+	<body>
+
+	<header>
+	Unievent
+	</header>
+
+	<nav>
+		<div class="search">
+			<form action="{{url_for('search')}}" method="post">
+				<label> <strong>Search:</strong>
+					<input type="search" placeholder="Search Events..." name="search">
+					<input type="submit" value="Go!">
+				</label>
+			</form>
+		</div>
+		<div class="controls">
+			<a id="link" href="{{url_for('login')}}">Login</a>
+			<a id="link" href="{{url_for('signup')}}">Sign Up</a>
+		</div>
+	</nav>
+
+	<main>
+		{% block content %}
+		{% endblock %}
+	</main>
+
+	<footer>
+	</footer>
+
+	</body>
+</html>

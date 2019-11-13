@@ -1,0 +1,23 @@
+{% extends "layout.html" %}
+{% block css %}
+<link rel="stylesheet" href="{{url_for('static', filename='css/login.css')}}">
+{% endblock %}
+{% block content %}
+	<section class="login">
+
+	<header>
+		<p><strong>Login!</strong></p>
+	</header>
+
+	<form action="/login" method="post">
+		<div class="form-inputs">
+			<p><label for="email"><strong>Email:</strong></label><input id="email" type="email" name="email"></p>
+			</p><label for="password"><strong>Password:</strong></label><input id="password" type="password" name="password"></p>
+		</div>
+		<div class="submit">
+			<input id="submit" type="submit" value="Login!">
+		</div>
+	</form>
+
+	</section>
+{% endblock %}
