@@ -42,6 +42,26 @@ class Events(db.Model):
     def __repr__(self):
         return '<Event "{}: {}">'.format(self.eid, self.name)
 
+class Admins(db.Model):
+    uid = db.Column('uid', db.Integer, primary_key = True)
+
+    def __init__(self, uid, email, name, hashed, salt):
+        self.uid = uid
+
+    def __repr__(self):
+        return '<Admin "{}">'.format(self.uid)
+
+class RSOs(db.Model):
+    rid = db.Column('rid', db.Integer, primary_key=True)
+    name = db.Column('name', db.String(88), nullable=False)
+
+    def __init__(self, rid, name):
+        self.rid = rid
+        self.name = name
+
+    def __repr__(self):
+        
+
 @app.route('/')
 def home():
   return render_template('home.html')
