@@ -1,29 +1,8 @@
-<!doctype html>
-<html>
-	<head>
-	<title>Events</title>
-	<link href="header.css" rel="stylesheet" type="text/css" media="all">
-	</head>
+{% extends "layout.html" %}
 
-	<header>
-		<nav>
-			<ul>
-			<li>
-				<div class="search-bar">
-					<form action="search.html" method="post">
-						<label> Search: 
-							<input type="search" placeholder="Search Events..." name="search">
-						</label>
-					</form>
-				</div>
-			</li>
-			<li><a href="login.html">Login</a></li>
-			<li><a href="signup.html">Sign Up</a></li>
-			</ul>
-		</nav>
-	</header>
+{% block search %}
+	{{ search_form.search_text }}
+{% endblock %}
 
-	<body>
-		
-	</body>
-</html>
+{% block content %}
+{% endblock %}

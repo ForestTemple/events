@@ -9,17 +9,17 @@
 
 	<body>
 
+	<a href="{{url_for('home')}}">
 	<header>
-	Unievent
+		Unievent
 	</header>
+	</a>
 
 	<nav>
 		<div class="search">
 			<form action="{{url_for('search')}}" method="post">
-				<label> <strong>Search:</strong>
-					<input type="search" placeholder="Search Events..." name="search">
-					<input type="submit" value="Go!">
-				</label>
+				{% block search %}
+				{% endblock %}
 			</form>
 		</div>
 		<div class="controls">
@@ -38,3 +38,14 @@
 
 	</body>
 </html>
+
+<!--
+			<form action="{{url_for('search')}}" method="post">
+				<label> <strong>Search:</strong>
+					<input type="search" placeholder="Search Events..." name="search">
+					<input type="submit" value="Go!">
+				</label>
+			</form>
+		</div>
+
+		--!>

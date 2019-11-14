@@ -10,6 +10,42 @@
 	</header>
 
 	<form action="/login" method="post">
+		{{ form.hidden_tag() }}
+		<div class="email">
+		{{ form.email.label() }} {{ form.email(size=30) }}
+		</div>
+		<div class="password">
+		{{ form.password.label() }} {{ form.password(size=33) }}
+		</div>
+		<div class="submit-buttons">
+			<div class='login-button'>
+			{{ form.login }}
+			</div>
+			<div class='submit-button'> 
+			{{ form.signup }}
+			</div>
+		</div>
+		{% if form.email.errors or form.password.errors %}
+		<div class="errors">
+			Email errs:
+			{% for e in form.email.errors %}
+			<p><em>{{ e }}</em></p> 
+			{% endfor %}
+			<br>
+			Password errs:
+			{% for e in form.password.errors %}
+			<p><em>{{ e }}</em></p> 
+			{% endfor %}
+		</div>
+		{% endif %}
+	</form>
+
+
+	</section>
+{% endblock %}
+
+<!-- 
+	<form action="/login" method="post">
 		<div class="form-inputs">
 			<p><label for="email"><strong>Email:</strong></label><input id="email" type="email" name="email"></p>
 			</p><label for="password"><strong>Password:</strong></label><input id="password" type="password" name="password"></p>
@@ -18,6 +54,4 @@
 			<input id="submit" type="submit" value="Login!">
 		</div>
 	</form>
-
-	</section>
-{% endblock %}
+--!>

@@ -1,25 +1,54 @@
-from flask import Flask, render_template, request, flash, redirect
+import secrets
+
+from flask import Flask, render_template, request, flash, redirect, url_for
+
+from werkzeug.security import generate_password_hash, check_password_hash
+
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, SubmitField
+from wtforms.validators import DataRequired, Email, Length
+
+from flask_login import LoginManager
+
 app = Flask(__name__)      
-app.secret_key = 'XYZ' # Make me more secret.
+app.secret_key = 'My very first predatory hawk scooped their prey off the palm tree in my garden yesterday morning at 10AM sharp.'
 app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql+psycopg2://events:events@localhost/events"
 db = SQLAlchemy(app)
+
+login_manager = LoginManager()
+login_manager.init_app(app)
+
+class SearchForm(FlaskForm):
+    search_text = StringField('search_text', validators=[Length(0, 500)])
+
+class LoginSignupForm(FlaskForm):
+    email = StringField('email', validators=[DataRequired(), Email(), Length(4, 30)])
+    password = PasswordField('password', validators=[DataRequired(), Length(6, 64)])
+    login = SubmitField()
+    signup = SubmitField()
 
 class Users(db.Model):
     uid = db.Column('uid', db.Integer, primary_key = True)
     email = db.Column('email', db.String(30), unique=True, nullable=False)
     name = db.Column('name', db.String(30), nullable=False)
-    hashed = db.Column('hash', db.String(512), nullable=False)
     salt = db.Column('salt', db.String(512), nullable=False)
+    hashed = db.Column('hash', db.String(512), nullable=False)
 
-    def __init__(self, uid, email, name, hashed, salt):
+    def __init__(self, uid, email, name, password):
         self.uid = uid
         self.email = email
         self.name = name
-        self.hashed = hashed
-        self.salt = salt
+        self.salt = secrets.token_urlsafe(256) # Columns are too large for hash and salt?
+        self.set_password(password)
+
+    def set_password(self, password):
+        self.hashed = generate_password_hash(password + self.salt)
+
+    def check_password(self, password):
+        return check_password_hash(self.hashed, password + self.salt)
 
     def __repr__(self):
         return '<User "{}">'.format(self.email)
@@ -182,22 +211,25 @@ class Events_Locations(db.Model):
 
 @app.route('/')
 def home():
-  return render_template('home.html')
+  return render_template('home.html', search_form=SearchForm())
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    if request.method == 'POST':
-        if isValidLogin(request.form['email'], request.form['password']):
-            # WTForm
+    form = LoginSignupForm()
+    if form.validate_on_submit():
+        if form.login.data:
+            # User is logging in. Authenticate from database.
             return redirect(url_for('search'))
-        return 
-
+        elif form.signup.data:
+            # Sign the user up, log them in, and redirect to search.
+            # HOME to distinguish buttons.
+            return redirect(url_for('home'))
     else:
-        return render_template('login.html')
+        return render_template('login.html', form=form)
 
 @app.route('/search', methods=['GET', 'POST'])
 def search():
-    return render_template('search.html')
+    return render_template('search.html', search_form=SearchForm())
 
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():

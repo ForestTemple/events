@@ -24,3 +24,15 @@ main {
 label {
 	color: darkgreen;
 }
+
+.errors {
+	color: red
+}
+
+.submit-buttons {
+	padding: 3em;
+}
+
+.login-button {
+	padding-bottom: 1em;
+}

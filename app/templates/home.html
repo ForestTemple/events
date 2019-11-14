@@ -1,4 +1,9 @@
 {% extends "layout.html" %}
+
+{% block search %}
+	{{ search_form.search_text }}
+{% endblock %}
+
 {% block content %}
 	<p>Hello, home.html!</p>
 {% endblock %}
