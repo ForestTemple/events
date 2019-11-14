@@ -1,15 +1,9 @@
-/*\c postgres;*/
-/*drop database events;
-create database events;
-\c events;
-*/
-
 CREATE TABLE Users (
 	uid SERIAL PRIMARY KEY,
 	email VARCHAR(30) UNIQUE NOT NULL,
 	name VARCHAR(30) NOT NULL,
-	hash VARCHAR(512) NOT NULL,
-	salt VARCHAR(512) NOT NULL
+	hash VARCHAR(256) NOT NULL,
+	salt VARCHAR(128) NOT NULL
 );
 
 CREATE TABLE Admins (
@@ -40,7 +34,6 @@ CREATE TABLE Events_Private (
 );
 
 CREATE TABLE RSOs (
-	
 	rid SERIAL PRIMARY KEY,
 	name VARCHAR(88)
 );

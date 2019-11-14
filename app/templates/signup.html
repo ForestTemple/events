@@ -1,24 +1,52 @@
 {% extends "layout.html" %}
 {% block css %}
-<link rel="stylesheet" href="{{url_for('static', filename='css/signup.css')}}">
+<link rel="stylesheet" href="{{url_for('static', filename='css/account.css')}}">
 {% endblock %}
 {% block content %}
-		<section class="login">
+	<section class="form-box">
 
-		<header>
-			<p><strong>Register a New Account!</strong></p>
-		</header>
+	<header>
+		<p><strong>Signup!</strong></p>
+	</header>
 
-		<form action="/login" method="post">
-			<div class="form-inputs">
-				<p><label for="email"><strong>Email:</strong></label><input id="email" type="email" name="email"></p>
-				</p><label for="password"><strong>Password:</strong></label><input id="password" type="password" name="password"></p>
-				</p><label for="password-again"><strong>Password (again):</strong></label><input id="password" type="password-again" name="password-again"></p>
-			</div>
-			<div class="submit">
-			<input id="submit" type="submit" value="Sign up!">
-			</div>
-		</form>
+	<form action="/signup" method="post">
+		{{ form.hidden_tag() }}
+		<div class="email">
+		{{ form.email.label() }} {{ form.email(size=30) }}
+		</div>
+		<div class="name">
+		{{ form.name.label() }} {{ form.name(size=29) }}
+		</div>
+		<div class="password">
+		{{ form.password.label() }} {{ form.password(size=33) }}
+		</div>
+		<div class="submit">
+			{{ form.signup }}
+		</div>
+		{% if form.email.errors or form.name.errors or form.password.errors %}
+		<div class="form-errors">
+			{% for e in form.email.errors %}
+			<p><em>{{ e }}</em></p> 
+			{% endfor %}
+			{% for e in form.password.errors %}
+			<p><em>{{ e }}</em></p> 
+			{% endfor %}
+			{% for e in form.name.errors %}
+			<p><em>{{ e }}</em></p> 
+			{% endfor %}
+		</div>
+		{% endif %}
+	</form>
 
-		</section>
+	{% with auth_errors = get_flashed_messages() %}
+	{% if auth_errors %}
+	<div class="auth-errors">
+		{% for e in auth_errors %}
+		<p><em>{{ e }}</em></p>
+		{% endfor %}
+	</div>
+	{% endif %}
+	{% endwith %}
+
+	</section>
 {% endblock %}

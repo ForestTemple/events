@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 
 {% block search %}
-	{{ search_form.search_text }}
+	{{ search_form.search_text.label }} {{ search_form.search_text(placeholder="Search...") }}
 {% endblock %}
 
 {% block content %}

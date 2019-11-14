@@ -11,7 +11,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import DataRequired, Email, Length
 
-from flask_login import LoginManager
+from flask_login import LoginManager, UserMixin, current_user, login_user
 
 app = Flask(__name__)      
 app.secret_key = 'My very first predatory hawk scooped their prey off the palm tree in my garden yesterday morning at 10AM sharp.'
@@ -22,26 +22,31 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 
 class SearchForm(FlaskForm):
-    search_text = StringField('search_text', validators=[Length(0, 500)])
+    search_text = StringField('Search', validators=[Length(0, 500)])
+    submit = SubmitField()
 
-class LoginSignupForm(FlaskForm):
+class LoginForm(FlaskForm):
     email = StringField('email', validators=[DataRequired(), Email(), Length(4, 30)])
     password = PasswordField('password', validators=[DataRequired(), Length(6, 64)])
     login = SubmitField()
+
+class SignupForm(FlaskForm): # TODO When a form goes bad, it doesn't tell you what field is wrong.
+    email = StringField('email', validators=[DataRequired(), Email(), Length(4, 30)])
+    name = StringField('name', validators=[DataRequired(), Length(1, 20)])
+    password = PasswordField('password', validators=[DataRequired(), Length(6, 64)])
     signup = SubmitField()
 
-class Users(db.Model):
+class Users(db.Model, UserMixin):
     uid = db.Column('uid', db.Integer, primary_key = True)
     email = db.Column('email', db.String(30), unique=True, nullable=False)
-    name = db.Column('name', db.String(30), nullable=False)
-    salt = db.Column('salt', db.String(512), nullable=False)
-    hashed = db.Column('hash', db.String(512), nullable=False)
+    name = db.Column('name', db.String(30))
+    salt = db.Column('salt', db.String(32), nullable=False)
+    hashed = db.Column('hash', db.String(256), nullable=False)
 
-    def __init__(self, uid, email, name, password):
-        self.uid = uid
+    def __init__(self, email, name, password):
         self.email = email
         self.name = name
-        self.salt = secrets.token_urlsafe(256) # Columns are too large for hash and salt?
+        self.salt = secrets.token_urlsafe(32) # Columns are too large for hash and salt?
         self.set_password(password)
 
     def set_password(self, password):
@@ -49,6 +54,9 @@ class Users(db.Model):
 
     def check_password(self, password):
         return check_password_hash(self.hashed, password + self.salt)
+
+    def get_id(self):
+        return self.uid
 
     def __repr__(self):
         return '<User "{}">'.format(self.email)
@@ -209,31 +217,59 @@ class Events_Locations(db.Model):
         return '<EventsLocation (lid={}, eid={})>'.format(
                 self.lid, self.eid)
 
+@login_manager.user_loader
+def load_user(uid):
+    return Users.query.get(int(uid))
+
 @app.route('/')
 def home():
   return render_template('home.html', search_form=SearchForm())
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    form = LoginSignupForm()
+    if current_user.is_authenticated:
+        return redirect(url_for('search'))
+
+    form = LoginForm()
     if form.validate_on_submit():
-        if form.login.data:
-            # User is logging in. Authenticate from database.
-            return redirect(url_for('search'))
-        elif form.signup.data:
-            # Sign the user up, log them in, and redirect to search.
-            # HOME to distinguish buttons.
-            return redirect(url_for('home'))
+        user = Users.query.filter_by(email=form.email.data).first()
+        print("Got user login for " + str(user))
+        if user is None or not user.check_password(form.password.data):
+            if user is None:
+                print("Invalid user.")
+            else:
+                print("Invalid password.")
+            flash('Invalid username or password')
+            return redirect(url_for('login'))
+        login_user(user)
+        return redirect(url_for('search'))
     else:
         return render_template('login.html', form=form)
+
+@app.route('/signup', methods=['GET', 'POST'])
+def signup():
+    if current_user.is_authenticated:
+        return redirect(url_for('search'))
+
+    form = SignupForm()
+    if form.validate_on_submit():
+        print(' '.join([form.email.data, form.name.data, form.password.data]))
+        user = Users.query.filter_by(email=form.email.data).first()
+        if user:
+            flash('This email is already taken.')
+            print("Taken user: " + str(user))
+            return redirect(url_for('signup'))
+        new_user = Users(form.email.data, form.name.data, form.password.data)
+        db.session.add(new_user)
+        db.session.commit()
+        print("Added new user: " + str(new_user))
+        login_user(new_user)
+        return redirect(url_for('search'))
+    return render_template('signup.html', form=form)
 
 @app.route('/search', methods=['GET', 'POST'])
 def search():
     return render_template('search.html', search_form=SearchForm())
-
-@app.route('/signup', methods=['GET', 'POST'])
-def signup():
-    return render_template('signup.html')
 
 if __name__ == '__main__':
   app.run(debug=True)

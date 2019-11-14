@@ -1,0 +1,27 @@
+main {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.form-box { 
+	border: 1px solid darkgreen;
+	width: 40em;
+	height: 16em;
+	margin-top: 3em;
+	background-color: lightgreen;
+	text-align: center;
+}
+
+.submit {
+	padding: 1em;
+}
+
+.form-box > label {
+	color: darkgreen;
+}
+
+.form-errors, .auth-errors {
+	color: red
+}
+

@@ -1,9 +1,9 @@
 {% extends "layout.html" %}
 {% block css %}
-<link rel="stylesheet" href="{{url_for('static', filename='css/login.css')}}">
+<link rel="stylesheet" href="{{url_for('static', filename='css/account.css')}}">
 {% endblock %}
 {% block content %}
-	<section class="login">
+	<section class="form-box">
 
 	<header>
 		<p><strong>Login!</strong></p>
@@ -17,22 +17,14 @@
 		<div class="password">
 		{{ form.password.label() }} {{ form.password(size=33) }}
 		</div>
-		<div class="submit-buttons">
-			<div class='login-button'>
-			{{ form.login }}
-			</div>
-			<div class='submit-button'> 
-			{{ form.signup }}
-			</div>
+		<div class="submit">
+		{{ form.login }}
 		</div>
 		{% if form.email.errors or form.password.errors %}
-		<div class="errors">
-			Email errs:
+		<div class="form-errors">
 			{% for e in form.email.errors %}
 			<p><em>{{ e }}</em></p> 
 			{% endfor %}
-			<br>
-			Password errs:
 			{% for e in form.password.errors %}
 			<p><em>{{ e }}</em></p> 
 			{% endfor %}
@@ -40,18 +32,15 @@
 		{% endif %}
 	</form>
 
+	{% with auth_errors = get_flashed_messages() %}
+	{% if auth_errors %}
+	<div class="auth-errors">
+		{% for e in auth_errors %}
+		<p><em>{{ e }}</em></p>
+		{% endfor %}
+	</div>
+	{% endif %}
+	{% endwith %}
 
 	</section>
 {% endblock %}
-
-<!-- 
-	<form action="/login" method="post">
-		<div class="form-inputs">
-			<p><label for="email"><strong>Email:</strong></label><input id="email" type="email" name="email"></p>
-			</p><label for="password"><strong>Password:</strong></label><input id="password" type="password" name="password"></p>
-		</div>
-		<div class="submit">
-			<input id="submit" type="submit" value="Login!">
-		</div>
-	</form>
---!>

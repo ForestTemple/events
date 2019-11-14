@@ -3,6 +3,7 @@
 	<head>
 	<title>Events</title>
 	<link href="{{url_for('static', filename='css/main.css')}}" rel="stylesheet" type="text/css" media="all">
+	<link rel="icon" href="{{url_for('static', filename='img/favicon.ico')}}" type="image/png">
 	{% block css %}
 	{% endblock %}
 	</head>
@@ -12,6 +13,9 @@
 	<a href="{{url_for('home')}}">
 	<header>
 		Unievent
+		{% if current_user.is_authenticated %}
+		AUTHENTICATED as {{ current_user }}
+		{% endif %}
 	</header>
 	</a>
 
@@ -23,8 +27,11 @@
 			</form>
 		</div>
 		<div class="controls">
-			<a id="link" href="{{url_for('login')}}">Login</a>
-			<a id="link" href="{{url_for('signup')}}">Sign Up</a>
+			{% if current_user.is_authenticated %}
+			{% else %}
+			<a href="{{url_for('login')}}">Login</a>
+			<a href="{{url_for('signup')}}">Sign Up</a>
+			{% endif %}
 		</div>
 	</nav>
 
