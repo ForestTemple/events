@@ -1,22 +1,39 @@
+:root {
+	--red: #bf616a;
+	--orange: #d08770;
+	--yellow: #ebcb8b;
+	--green: #a3be8c;
+	--purple: #b48ead;
+
+	--lightblue: #88c0d0;
+	--darkblue: #5e81ac;
+
+	--black: #2e3440;
+	--darkgrey: #4c556a;
+	--grey: #d8dee9;
+	--lightgrey: #e5e9f0;
+	--white: #eceff4;
+}
+
 body {
-	background-color: #eee;
+	background-color: var(--grey);
 }
 
 body > a {
 	text-decoration: none;
-	color: blue;
+	color: var(--var(--blue));
 }
 
 body > a:visited {
 	text-decoration: none;
-	color: blue;
+	color: var(--blue);
 }
 
 body > a > header {
 	padding: 1em 0.5em;
 	text-align: center;
 	font-size: 2em;
-	background-color: lightblue;
+	background-color: var(--blue);
 }
 
 nav {
@@ -24,7 +41,7 @@ nav {
 	border-bottom: 1px;
 	border-top: 1px;
 	height: 4em;
-	background-color: lightgreen;
+	background-color: var(--green);
 	align-items: center;
 	justify-content: flex-end;
 }
@@ -39,13 +56,13 @@ nav > .controls {
 nav > .controls a {
 	padding: 1em 2em;
 	text-decoration: none;
-	background-color: darkblue;
+	background-color: var(--blue);
 	color: #fff;
 }
 
 nav > .controls a:hover {
 	opacity: 80%;
-	color: lightblue;
+	color: var(--lightblue);
 }
 
 nav strong {

@@ -8,7 +8,7 @@ from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField
+from wtforms import StringField, PasswordField, SubmitField, SelectField, DateField
 from wtforms.validators import DataRequired, Email, Length
 
 from flask_login import LoginManager, UserMixin, current_user, login_user
@@ -22,24 +22,34 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 
 class SearchForm(FlaskForm):
-    search_text = StringField('Search', validators=[Length(0, 500)])
-    submit = SubmitField()
+    # Event name: Text
+    # Event type: Drop-down {Public, Private, RSO} ONLY AUTHENTICATED
+    # University: Text  # nickname table for uni?
+    # Date: DatePicker.html
+    event_name = StringField('Event Name', validators=[Length(0, 500)])
+    event_type = SelectField(
+            'Event Type',
+            choices = [('public', 'Public Events'), ('private', 'Private Events'), ('rso', 'Your RSO Events')]
+    )
+    university_name = StringField('University Name', validators=[Length(0, 500)])
+    datestamp = DateField()
+    submit = SubmitField('Search!')
 
 class LoginForm(FlaskForm):
-    email = StringField('email', validators=[DataRequired(), Email(), Length(4, 30)])
-    password = PasswordField('password', validators=[DataRequired(), Length(6, 64)])
+    email = StringField('email', validators=[DataRequired(), Email(), Length(4, 50)])
+    password = PasswordField('password', validators=[DataRequired(), Length(6, 50)])
     login = SubmitField()
 
 class SignupForm(FlaskForm): # TODO When a form goes bad, it doesn't tell you what field is wrong.
-    email = StringField('email', validators=[DataRequired(), Email(), Length(4, 30)])
+    email = StringField('email', validators=[DataRequired(), Email(), Length(4, 50)])
     name = StringField('name', validators=[DataRequired(), Length(1, 20)])
-    password = PasswordField('password', validators=[DataRequired(), Length(6, 64)])
+    password = PasswordField('password', validators=[DataRequired(), Length(6, 50)])
     signup = SubmitField()
 
 class Users(db.Model, UserMixin):
     uid = db.Column('uid', db.Integer, primary_key = True)
-    email = db.Column('email', db.String(30), unique=True, nullable=False)
-    name = db.Column('name', db.String(30))
+    email = db.Column('email', db.String(50), unique=True, nullable=False)
+    name = db.Column('name', db.String(50))
     salt = db.Column('salt', db.String(32), nullable=False)
     hashed = db.Column('hash', db.String(256), nullable=False)
 
@@ -63,9 +73,9 @@ class Users(db.Model, UserMixin):
 
 class Events(db.Model):
     eid = db.Column('eid', db.Integer, primary_key = True)
-    email = db.Column('email', db.String(30), nullable=False)
-    name = db.Column('name', db.String(88), nullable=False)
-    description = db.Column('description', db.String(88))
+    email = db.Column('email', db.String(50), nullable=False)
+    name = db.Column('name', db.String(100), nullable=False)
+    description = db.Column('description', db.String(100))
     datestamp = db.Column('datestamp', db.DateTime, nullable=False)
     location = db.relationship(
             'Events_Locations', backref='events', lazy=True, uselist=False)
@@ -81,7 +91,7 @@ class Events(db.Model):
         return '<Event "{}: {}">'.format(self.eid, self.name)
 
 class Admins(db.Model):
-    uid = db.Column('uid', db.Integer, primary_key = True)
+    uid = db.Column('uid', db.Integer, db.ForeignKey('users.uid'), primary_key = True)
 
     def __init__(self, uid):
         self.uid = uid
@@ -90,7 +100,7 @@ class Admins(db.Model):
         return '<Admin "{}">'.format(self.uid)
 
 class SuperAdmins(db.Model):
-    uid = db.Column('uid', db.Integer, primary_key = True)
+    uid = db.Column('uid', db.Integer, db.ForeignKey('users.uid'), primary_key = True)
 
     def __init__(self, uid):
         self.uid = uid
@@ -100,7 +110,7 @@ class SuperAdmins(db.Model):
 
 class RSOs(db.Model):
     rid = db.Column('rid', db.Integer, primary_key=True)
-    name = db.Column('name', db.String(88), nullable=False)
+    name = db.Column('name', db.String(100), nullable=False)
 
     def __init__(self, rid, name):
         self.rid = rid
@@ -111,29 +121,31 @@ class RSOs(db.Model):
 
 class Events_Private(db.Model):
     eid = db.Column('eid', db.Integer, primary_key=True)
+    unid = db.Column('unid', db.Integer, db.ForeignKey('universities.unid'), nullable=False)
 
-    def __init__(self, eid):
+    def __init__(self, eid, unid):
         self.eid = eid
+        self.unid = unid
 
     def __repr__(self):
-        return '<EventsPrivate "{}">'.format(self.eid)
+        return '<EventsPrivate ({}, {})>'.format(self.eid, self.unid)
 
 class Events_RSO(db.Model):
-    eid = db.Column('eid', db.Integer, primary_key=True)
-    rid = db.Column('rid', db.Integer, nullable=False)
+    eid = db.Column('eid', db.Integer, db.ForeignKey('events.eid'), primary_key=True)
+    rid = db.Column('rid', db.Integer, db.ForeignKey('rsos.rid'), nullable=False)
 
     def __init__(self, eid, rid):
         self.eid = eid
         self.rid = rid
 
     def __repr__(self):
-        return '<EventsPrivate "{}">'.format(self.eid)
+        return '<EventsPrivate ({}, {})>'.format(self.eid, self.rid)
 
 class Comments(db.Model):
     cid = db.Column('cid', db.Integer, primary_key=True)
     eid = db.Column('eid', db.Integer, nullable=False)
-    email = db.Column('email', db.String(88), nullable=False)
-    text = db.Column('text', db.String(88), nullable=False)
+    email = db.Column('email', db.String(100), nullable=False)
+    text = db.Column('text', db.String(100), nullable=False)
     honor = db.Column('honor', db.Integer)
     datestamp = db.Column('datestamp', db.DateTime)
 
@@ -152,7 +164,7 @@ class Comments(db.Model):
 class Universities(db.Model):
     unid = db.Column('unid', db.Integer, primary_key=True)
     num_students = db.Column('num_students', db.Integer)
-    name = db.Column('name', db.String(88), nullable=False)
+    name = db.Column('name', db.String(100), nullable=False)
     description = db.Column('description', db.String(200))
 
     def __init__(self, unid, num_students, name, description):
@@ -179,7 +191,7 @@ class Locations(db.Model):
     lid = db.Column('lid', db.Integer, primary_key=True)
     latitude = db.Column('latitude', db.Float, nullable=False)
     longitude = db.Column('longitude', db.Float, nullable=False)
-    name = db.Column('name', db.String(88))
+    name = db.Column('name', db.String(100))
 
     def __init__(self, lid, latitude, longitude, name):
         self.lid = lid
@@ -269,7 +281,11 @@ def signup():
 
 @app.route('/search', methods=['GET', 'POST'])
 def search():
-    return render_template('search.html', search_form=SearchForm())
+    form = SearchForm()
+    items = []
+    if form.validate_on_submit():
+       # TODO 
+    return render_template('search.html', form=form, items=items)
 
 if __name__ == '__main__':
   app.run(debug=True)

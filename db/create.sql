@@ -1,7 +1,7 @@
 CREATE TABLE Users (
 	uid SERIAL PRIMARY KEY,
-	email VARCHAR(30) UNIQUE NOT NULL,
-	name VARCHAR(30) NOT NULL,
+	email VARCHAR(50) UNIQUE NOT NULL,
+	name VARCHAR(50) NOT NULL,
 	hash VARCHAR(256) NOT NULL,
 	salt VARCHAR(128) NOT NULL
 );
@@ -20,9 +20,9 @@ CREATE TABLE SuperAdmins (
 
 CREATE TABLE Events (
 	eid SERIAL PRIMARY KEY,
-	email VARCHAR(30) NOT NULL,
-	name VARCHAR(88) NOT NULL,
-	description VARCHAR(88),
+	email VARCHAR(50) NOT NULL,
+	name VARCHAR(100) NOT NULL,
+	description VARCHAR(100),
 	phone VARCHAR(20),
 	datestamp DATE
 );
@@ -35,7 +35,8 @@ CREATE TABLE Events_Private (
 
 CREATE TABLE RSOs (
 	rid SERIAL PRIMARY KEY,
-	name VARCHAR(88)
+	uid # add me, owner
+	name VARCHAR(100)
 );
 
 CREATE TABLE Events_RSO (
@@ -49,8 +50,8 @@ CREATE TABLE Events_RSO (
 
 CREATE TABLE Comments (
 	cid SERIAL PRIMARY KEY,
-	email VARCHAR(88) NOT NULL,
-	text VARCHAR(88) NOT NULL,
+	email VARCHAR(100) NOT NULL,
+	text VARCHAR(100) NOT NULL,
 	honor INTEGER,
 	eid INTEGER NOT NULL,
 	datestamp DATE,
@@ -61,7 +62,7 @@ CREATE TABLE Comments (
 CREATE TABLE Universities (
 	UNID SERIAL PRIMARY KEY,
 	num_students INTEGER,
-	name VARCHAR(88),
+	name VARCHAR(100),
 	description VARCHAR(200)
 );
 
@@ -76,7 +77,7 @@ CREATE TABLE Locations (
 	lid SERIAL PRIMARY KEY,
 	latitude REAL NOT NULL,
 	longitude REAL NOT NULL,
-	name VARCHAR(88)
+	name VARCHAR(100)
 );
 
 CREATE TABLE Universities_Locations (

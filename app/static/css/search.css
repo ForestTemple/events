@@ -1,0 +1,12 @@
+sidebar { 
+	width: 20rem;
+	background-color: var(--green);
+	border: 1px 1px 0px 0px solid darkgreen;
+	display: flex;
+	align-items: center;
+	justify-items: center;
+} 
+
+sidebar > header {
+	text-align: center;
+}
