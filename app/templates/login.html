@@ -9,13 +9,14 @@
 	<section class="form-box">
 
 	<header>
-		<p><strong>Login!</strong></p>
+		<h2>Login!</h2> 
 	</header>
 
 	<form action="/login" method="post">
+		{{ form.hidden_tag() }}
 		<div class="email">{{ form.email(placeholder='Email') }}</div>
 		<div class="password">{{ form.password(placeholder='Password') }}</div>
-		<div class="submit">{{ form.login }}</div>
+		<div class="submit">{{ form.login(class='button') }}</div>
 		{% if form.email.errors or form.password.errors %}
 		<div class="form-errors">
 			{% for e in form.email.errors %}

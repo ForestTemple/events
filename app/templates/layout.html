@@ -10,42 +10,42 @@
 
 	<body>
 
-	<a href="{{url_for('home')}}">
 	<header>
-		Unievent
-		{% if current_user.is_authenticated %}
-		AUTHENTICATED as {{ current_user }}
-		{% endif %}
+		<a class="button" href="{{url_for('home')}}">
+		<h1>Unievent</h1>
+		</a>
 	</header>
-	</a>
-
 	<nav>
 		<div class="controls-left">
 		{% if current_user.is_superadmin %}
-		<a href="{{url_for('manage_universities')}}">Manage Universities</a>
-		<a href="{{url_for('create_university')}}">Create University</a>
+		<a class="button" href="{{url_for('manage_universities')}}">Manage Universities</a>
+		<a class="button" href="{{url_for('create_university')}}">Create University</a>
 		{% endif %}
 		{% if current_user.is_admin %}
-		<a href="{{url_for('manage_rso')}}">Manage RSO</a>
+		<a class="button" href="{{url_for('manage_rso')}}">Manage RSO</a>
 		{% elif current_user.is_authenticated %}
-		<a href="{{url_for('create_rso')}}">Create RSO</a>
+		<a class="button" href="{{url_for('create_rso')}}">Create RSO</a>
 		{% endif %}
 		</div>
 		<div class="controls-right">
 			{% if current_user.is_authenticated %}
-			<a href="{{url_for('logout')}}">Logout</a>
+			<span class="user-info">{{current_user}}
+			{% if current_user.is_admin or current_user.is_superadmin %}::&lt;{% endif %}
+			{% if current_user.is_admin %}Admin{% endif %}
+			{% if current_user.is_admin and current_user.is_admin %}, {% endif %}
+			{% if current_user.is_superadmin %} SuperAdmin {% endif %} 
+			{% if current_user.is_admin or current_user.is_superadmin %}&lt;{% endif %}
+			</span>
+			<a class="button" href="{{url_for('logout')}}">Logout</a>
 			{% else %}
-			<a href="{{url_for('login')}}">Login</a>
-			<a href="{{url_for('signup')}}">Sign Up</a>
+			<a class="button" href="{{url_for('login')}}">Login</a>
+			<a class="button" href="{{url_for('signup')}}">Sign Up</a>
 			{% endif %}
 		</div>
 	</nav>
 
 	{% block content %}
 	{% endblock %}
-
-	<footer>
-	</footer>
 
 	</body>
 </html>

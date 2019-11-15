@@ -4,7 +4,9 @@ aside {
 	padding: 0.5rem;
 
 	background-color: var(--green);
-	border: 1px 1px 1px 0px solid darkgreen;
+	border-width: 0px 1px 1px 1px;
+	border-color: darkgreen;
+	border-style: solid;
 	display: flex;
 	flex-direction: column;
 	align-items: center;
@@ -15,17 +17,9 @@ aside > header {
 	color: var(--black);
 }
 
-.submit {
-	width: 15rem;
-	height: 3rem;
-	background-color: var(--darkblue);
-	color: var(--white);
-	border: none;
-}
-
-.submit:hover {
-	cursor: pointer;
-	opacity: 80%;
+aside .button {
+	width: 100%;
+	margin: 0;
 }
 
 form {
