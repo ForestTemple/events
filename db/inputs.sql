@@ -1,21 +1,18 @@
 /*
 INSERT INTO Users (email, name, hash, salt) VALUES
 	('mike@knights.ucf.edu', 'Michael', '293481-59121sdfasf', 'asd2344234423'),
-	('donovan@knights.ucf.edu', 'Donovan', '293481-1sdfasf', 'as4234423'),
+	('don@knights.ucf.edu', 'Donovan', '293481-1sdfasf', 'as4234423'),
 	('seth@ucla.edu', 'Seth', '123492334222342423', '12342134123')
 ;
-*/
 
-/*
+
 INSERT INTO SuperAdmins (uid) VALUES
 	(1)
-;
 
 INSERT INTO Admins (uid) VALUES
 	(2)
-;
-*/
 
+*/
 INSERT INTO Events (email, name, description, phone, datestamp) VALUES
 	('mike@knights.ucf.edu', 'Michael', 'This is a fun PRIVATE event', '561-545-4324', '20191231T153532'),
 	('mike@knights.ucf.edu', 'Michael', 'This is also a very fun event', '561-545-4324', '20191125T153532')

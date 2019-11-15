@@ -7,13 +7,13 @@ CREATE TABLE Users (
 );
 
 CREATE TABLE Admins (
-	uid SERIAL PRIMARY KEY,
+	uid INTEGER PRIMARY KEY,
 	FOREIGN KEY (uid) REFERENCES Users(uid)
 		ON DELETE CASCADE
 );
 
-CREATE TABLE SuperAdmins (
-	uid SERIAL PRIMARY KEY,
+CREATE TABLE Super_Admins (
+	uid INTEGER PRIMARY KEY,
 	FOREIGN KEY (uid) REFERENCES Users(uid)
 		ON DELETE CASCADE
 );
@@ -35,8 +35,9 @@ CREATE TABLE Events_Private (
 
 CREATE TABLE RSOs (
 	rid SERIAL PRIMARY KEY,
-	uid # add me, owner
-	name VARCHAR(100)
+	uid INTEGER,
+	name VARCHAR(100),
+	FOREIGN KEY (uid) REFERENCES Admins
 );
 
 CREATE TABLE Events_RSO (

@@ -1,29 +1,24 @@
 {% extends "layout.html" %}
+
 {% block css %}
-<link rel="stylesheet" href="{{url_for('static', 'css/search.css')}}">
+<link rel="stylesheet" href="{{url_for('static', filename='css/search.css')}}">
 {% endblock %}
 
 {% block content %}
-<sidebar>
+<aside>
 	<header>
-		<h1>Search</h1>
+		<h2>Search Events</h2>
 	</header>
 
 	<form action="/search" method="post">
-		<div class="event_name">
-		{{ form.event_name.label() }} {{ form.event_name }}
-		</div>
-		<div class="event_type">
-		{{ form.event_type.label() }} {{ form.event_type }}
-		</div>
-		<div class="university_name">
-		{{ form.university_name.label() }} {{ form.university_name }}
-		</div>
-		<div class="datestamp">
-			{{ form.datestamp }}
-		</div>
+		<div class="field"> {{ form.event_name(placeholder='Event')}}</div>
+		<div class="field"> {{ form.university_name(placeholder='University') }}</div>
+		<div class="big-field"> {{ form.event_type }}</div>
+		<div class="big-field"><div>{{ form.date_begin.label() }}</div><div>{{ form.date_begin }}</div></div>
+		<div class="big-field"><div>{{ form.date_end.label() }}</div><div>{{ form.date_end }}</div></div>
+		<div class="submit">{{ form.submit(class='submit') }}</div>
 	</form>
-</sidebar>
+</aside>
 
 <main>
 	{% for event in events %}

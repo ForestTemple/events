@@ -1,7 +1,9 @@
 {% extends "layout.html" %}
+
 {% block css %}
 <link rel="stylesheet" href="{{url_for('static', filename='css/account.css')}}">
 {% endblock %}
+
 {% block content %}
 <main>
 	<section class="form-box">
@@ -11,16 +13,9 @@
 	</header>
 
 	<form action="/login" method="post">
-		{{ form.hidden_tag() }}
-		<div class="email">
-		{{ form.email.label() }} {{ form.email(size=30) }}
-		</div>
-		<div class="password">
-		{{ form.password.label() }} {{ form.password(size=33) }}
-		</div>
-		<div class="submit">
-		{{ form.login }}
-		</div>
+		<div class="email">{{ form.email(placeholder='Email') }}</div>
+		<div class="password">{{ form.password(placeholder='Password') }}</div>
+		<div class="submit">{{ form.login }}</div>
 		{% if form.email.errors or form.password.errors %}
 		<div class="form-errors">
 			{% for e in form.email.errors %}

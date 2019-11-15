@@ -15,13 +15,30 @@
 	--white: #eceff4;
 }
 
+.button {
+	height: 3rem;
+	background-color: var(--darkblue);
+	color: var(--white);
+	border: none;
+}
+
+.button:hover {
+	cursor: pointer;
+	opacity: 80%;
+}
+
+a:hover {
+	opacity: 80%;
+}
+
 body {
 	background-color: var(--grey);
+	color: var(--black);
 }
 
 body > a {
 	text-decoration: none;
-	color: var(--var(--blue));
+	color: var(--darkblue);
 }
 
 body > a:visited {
@@ -30,39 +47,31 @@ body > a:visited {
 }
 
 body > a > header {
-	padding: 1em 0.5em;
+	padding: 1rem 0.5rem;
 	text-align: center;
 	font-size: 2em;
-	background-color: var(--blue);
+	background-color: var(--darkblue);
+	color: var(--white);
 }
 
 nav {
 	display: flex; 
-	border-bottom: 1px;
-	border-top: 1px;
+	border-bottom: 1px solid darkgreen;
+	border-left: 1px solid darkgreen;
+	border-right: 1px solid darkgreen;
 	height: 4em;
 	background-color: var(--green);
 	align-items: center;
-	justify-content: flex-end;
+	justify-content: space-between;
 }
 
-nav  .search {
-	margin: 10px;
-}
-
-nav > .controls {
-}
-
-nav > .controls a {
+nav a {
+	display: inline-block;
 	padding: 1em 2em;
+	margin: 0 2em 0;
 	text-decoration: none;
-	background-color: var(--blue);
+	background-color: var(--darkblue);
 	color: #fff;
-}
-
-nav > .controls a:hover {
-	opacity: 80%;
-	color: var(--lightblue);
 }
 
 nav strong {

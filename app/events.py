@@ -1,6 +1,6 @@
 import secrets
 
-from flask import Flask, render_template, request, flash, redirect, url_for
+from flask import Flask, render_template, request, flash, redirect, url_for, sessions
 
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -8,10 +8,11 @@ from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, SelectField, DateField
+from wtforms import StringField, PasswordField, SubmitField, SelectField
+from wtforms.fields.html5 import DateField
 from wtforms.validators import DataRequired, Email, Length
 
-from flask_login import LoginManager, UserMixin, current_user, login_user
+from flask_login import LoginManager, UserMixin, current_user, login_user, logout_user
 
 app = Flask(__name__)      
 app.secret_key = 'My very first predatory hawk scooped their prey off the palm tree in my garden yesterday morning at 10AM sharp.'
@@ -29,10 +30,11 @@ class SearchForm(FlaskForm):
     event_name = StringField('Event Name', validators=[Length(0, 500)])
     event_type = SelectField(
             'Event Type',
-            choices = [('public', 'Public Events'), ('private', 'Private Events'), ('rso', 'Your RSO Events')]
+            choices = [('all', 'All Events'), ('public', 'Public Events'), ('private', 'Private Events')]
     )
     university_name = StringField('University Name', validators=[Length(0, 500)])
-    datestamp = DateField()
+    date_begin = DateField('From:', format='%Y-%m-%d')
+    date_end = DateField('To:', format='%Y-%m-%d')
     submit = SubmitField('Search!')
 
 class LoginForm(FlaskForm):
@@ -235,7 +237,9 @@ def load_user(uid):
 
 @app.route('/')
 def home():
-  return render_template('home.html', search_form=SearchForm())
+    if current_user.is_authenticated:
+        return redirect(url_for('search'))
+    return render_template('home.html')
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -247,16 +251,54 @@ def login():
         user = Users.query.filter_by(email=form.email.data).first()
         print("Got user login for " + str(user))
         if user is None or not user.check_password(form.password.data):
-            if user is None:
-                print("Invalid user.")
-            else:
-                print("Invalid password.")
             flash('Invalid username or password')
             return redirect(url_for('login'))
         login_user(user)
+        cuid = current_user.get_id()
+        current_user.is_superadmin = \
+            SuperAdmins.query.filter_by(uid=cuid).first() is not None
+        current_user.is_admin = \
+            Admins.query.filter_by(uid=cuid).first() is not None
         return redirect(url_for('search'))
     else:
+        print("not valid")
+        print(form.email.data, form.password.data)
         return render_template('login.html', form=form)
+
+@app.route('/logout')
+def logout():
+    current_user.admin = False
+    current_user.superadmin = False 
+    logout_user()
+    return redirect(url_for('home'))
+
+@app.route('/profile', methods=['GET', 'POST'])
+def profile():
+    if current_user.is_anonymous:
+        return redirect(url_for('home'))
+
+    if current_user.is_superadmin:
+        print("superadmin")
+    elif current_user.is_admin:
+        print("admin")
+    else: 
+        print("autheduser")
+
+@app.route('/create_rso', methods=['GET', 'POST'])
+def create_rso():
+    return render_template('create_rso.html')
+
+@app.route('/manage_rso', methods=['GET', 'POST'])
+def manage_rso():
+    return render_template('manage_rso.html')
+
+@app.route('/create_university', methods=['GET', 'POST'])
+def create_university():
+    return render_template('create_university.html')
+
+@app.route('/manage_universities', methods=['GET', 'POST'])
+def manage_universities():
+    return render_template('manage_universities.html')
 
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
@@ -274,7 +316,6 @@ def signup():
         new_user = Users(form.email.data, form.name.data, form.password.data)
         db.session.add(new_user)
         db.session.commit()
-        print("Added new user: " + str(new_user))
         login_user(new_user)
         return redirect(url_for('search'))
     return render_template('signup.html', form=form)
@@ -284,6 +325,7 @@ def search():
     form = SearchForm()
     items = []
     if form.validate_on_submit():
+        pass
        # TODO 
     return render_template('search.html', form=form, items=items)
 

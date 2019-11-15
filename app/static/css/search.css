@@ -1,12 +1,43 @@
-sidebar { 
+aside { 
 	width: 20rem;
-	background-color: var(--green);
-	border: 1px 1px 0px 0px solid darkgreen;
-	display: flex;
-	align-items: center;
-	justify-items: center;
-} 
+	height: 100%;
+	padding: 0.5rem;
 
-sidebar > header {
-	text-align: center;
+	background-color: var(--green);
+	border: 1px 1px 1px 0px solid darkgreen;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-items: space-around;
+}
+
+aside > header { 
+	color: var(--black);
+}
+
+.submit {
+	width: 15rem;
+	height: 3rem;
+	background-color: var(--darkblue);
+	color: var(--white);
+	border: none;
+}
+
+.submit:hover {
+	cursor: pointer;
+	opacity: 80%;
+}
+
+form {
+	display: flex;
+	flex-direction: column;
+	width: 15rem;
+}
+
+form .big-field {
+	display: flex;
+	justify-content: space-between;
+	height: 1.2rem;
+	padding: 5px 0px;
+	width: 15rem;
 }
