@@ -1,29 +1,23 @@
 {% extends "layout.html" %}
+
 {% block css %}
 <link rel="stylesheet" href="{{url_for('static', filename='css/account.css')}}">
 {% endblock %}
+
 {% block content %}
 <main>
 	<section class="form-box">
 
 	<header>
-		<p><strong>Signup!</strong></p>
+		<h2>Signup!</h2>
 	</header>
 
 	<form action="/signup" method="post">
 		{{ form.hidden_tag() }}
-		<div class="email">
-		{{ form.email.label() }} {{ form.email(size=30) }}
-		</div>
-		<div class="name">
-		{{ form.name.label() }} {{ form.name(size=29) }}
-		</div>
-		<div class="password">
-		{{ form.password.label() }} {{ form.password(size=33) }}
-		</div>
-		<div class="submit">
-			{{ form.signup }}
-		</div>
+		{{ form.email(placeholder='Email') }}
+		{{ form.name(placeholder='Name') }}
+		{{ form.password(placeholder='Password') }}
+		{{ form.signup(class='button') }}
 		{% if form.email.errors or form.name.errors or form.password.errors %}
 		<div class="form-errors">
 			{% for e in form.email.errors %}

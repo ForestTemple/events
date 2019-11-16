@@ -1,0 +1,51 @@
+{% extends "layout.html" %}
+
+{% block css %}
+<link rel="stylesheet" href="{{url_for('static', filename='css/rso.css')}}">
+{% endblock %}
+
+{% block content %}
+<main>
+	<section class="form-box">
+
+	<header>
+		<h2>Create RSO</h2> 
+	</header>
+
+	<form action="/rso/create" method="post">
+		<div>{{ form.hidden_tag() }}</div>
+		<div>{{ form.name(placeholder='RSO Name') }}</div>
+		<div>{{ form.email1(placeholder='Student Email 1') }}</div>
+		<div>{{ form.email2(placeholder='Student Email 2') }}</div>
+		<div>{{ form.email3(placeholder='Student Email 3') }}</div>
+		<div>{{ form.email4(placeholder='Student Email 4') }}</div>
+		<div>{{ form.email5(placeholder='Student Email 5') }}</div>
+		<div>{{ form.submit(class='button') }}</div>
+		{% if form.email1.errors or form.email2.errors or form.email3.errors  
+			or form.university.errors or form.email4.errors 
+			or form.email5.errors or form.name.errors %}
+		<div class="form-errors">
+			{% for e in form.name.errors %}<p><em>{{ e }}</em></p>{% endfor %}
+			{% for e in form.email1.errors %}<p><em>{{ e }}</em></p>{% endfor %}
+			{% for e in form.email2.errors %}<p><em>{{ e }}</em></p>{% endfor %}
+			{% for e in form.email3.errors %}<p><em>{{ e }}</em></p>{% endfor %}
+			{% for e in form.email4.errors %}<p><em>{{ e }}</em></p>{% endfor %}
+			{% for e in form.email5.errors %}<p><em>{{ e }}</em></p>{% endfor %}
+		</div>
+		{% endif %}
+	</form>
+
+	{% with post_errors = get_flashed_messages() %}
+	{% if post_errors %}
+	<div class="post-errors">
+		{% for e in post_errors %}
+		<p><em>{{ e }}</em></p>
+		{% endfor %}
+	</div>
+	{% endif %}
+	{% endwith %}
+
+	</section>
+</main>
+
+{% endblock %}

@@ -1,3 +1,10 @@
+CREATE TABLE Locations (
+	lid SERIAL PRIMARY KEY,
+	latitude REAL NOT NULL,
+	longitude REAL NOT NULL,
+	name VARCHAR(100)
+);
+
 CREATE TABLE Users (
 	uid SERIAL PRIMARY KEY,
 	email VARCHAR(50) UNIQUE NOT NULL,
@@ -18,26 +25,45 @@ CREATE TABLE Super_Admins (
 		ON DELETE CASCADE
 );
 
+CREATE TABLE Universities (
+	unid SERIAL PRIMARY KEY,
+	name VARCHAR(100) NOT NULL,
+	description VARCHAR(200),
+	lid INTEGER NOT NULL,
+	num_students INTEGER,
+	FOREIGN KEY (lid) REFERENCES Locations
+);
+
+CREATE TABLE Universities_Pictures (
+	unid INTEGER,
+	file_path VARCHAR(50) PRIMARY KEY,
+	FOREIGN KEY (unid) REFERENCES Universities(unid)
+		ON DELETE CASCADE
+);
+
 CREATE TABLE Events (
 	eid SERIAL PRIMARY KEY,
+	unid INTEGER,
 	email VARCHAR(50) NOT NULL,
 	name VARCHAR(100) NOT NULL,
+	lid INTEGER NOT NULL,
 	description VARCHAR(100),
 	phone VARCHAR(20),
 	datestamp DATE
 );
 
 CREATE TABLE Events_Private (
-	eid SERIAL PRIMARY KEY,
+	eid INTEGER PRIMARY KEY,
 	FOREIGN KEY (eid) REFERENCES Events(eid)
 		ON DELETE CASCADE
 );
 
 CREATE TABLE RSOs (
 	rid SERIAL PRIMARY KEY,
-	uid INTEGER,
-	name VARCHAR(100),
-	FOREIGN KEY (uid) REFERENCES Admins
+	uid INTEGER NOT NULL, 
+	name VARCHAR(100) NOT NULL,
+	/* add desc? */
+	FOREIGN KEY (uid) REFERENCES Admins(uid)
 );
 
 CREATE TABLE Events_RSO (
@@ -49,48 +75,20 @@ CREATE TABLE Events_RSO (
 		ON DELETE CASCADE
 );
 
+CREATE TABLE RSOs_Member ( /* New model */
+	rid INTEGER NOT NULL,
+	uid INTEGER NOT NULL,
+	FOREIGN KEY (rid) REFERENCES RSOs(rid),
+	FOREIGN KEY (uid) REFERENCES Users(uid)
+);
+
 CREATE TABLE Comments (
 	cid SERIAL PRIMARY KEY,
+	eid INTEGER NOT NULL,
 	email VARCHAR(100) NOT NULL,
 	text VARCHAR(100) NOT NULL,
 	honor INTEGER,
-	eid INTEGER NOT NULL,
 	datestamp DATE,
 	FOREIGN KEY (eid) REFERENCES Events(eid)
 		ON DELETE CASCADE
 );
-
-CREATE TABLE Universities (
-	UNID SERIAL PRIMARY KEY,
-	num_students INTEGER,
-	name VARCHAR(100),
-	description VARCHAR(200)
-);
-
-CREATE TABLE Universities_Pictures (
-	UNID SERIAL,
-	file_path VARCHAR(50) PRIMARY KEY,
-	FOREIGN KEY (UNID) REFERENCES Universities(UNID)
-		ON DELETE CASCADE
-);
-
-CREATE TABLE Locations (
-	lid SERIAL PRIMARY KEY,
-	latitude REAL NOT NULL,
-	longitude REAL NOT NULL,
-	name VARCHAR(100)
-);
-
-CREATE TABLE Universities_Locations (
-	lid INTEGER PRIMARY KEY,
-	unid INTEGER NOT NULL,
-	FOREIGN KEY (unid) REFERENCES Universities(unid),
-	FOREIGN KEY (lid) REFERENCES Locations(lid)
-);
-
-CREATE TABLE Events_Locations (
-	lid INTEGER PRIMARY KEY,
-	eid INTEGER NOT NULL,
-	FOREIGN KEY (eid) REFERENCES Events(eid),
-	FOREIGN KEY (lid) REFERENCES Locations(lid)
-); 

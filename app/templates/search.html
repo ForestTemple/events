@@ -5,26 +5,35 @@
 {% endblock %}
 
 {% block content %}
-<aside>
-	<header>
-		<h2>Search Events</h2>
-	</header>
-
-	<form action="/search" method="post">
-		<div class="field"> {{ form.event_name(placeholder='Event')}}</div>
-		<div class="field"> {{ form.university_name(placeholder='University') }}</div>
-		<div class="big-field"> {{ form.event_type }}</div>
-		<div class="big-field"><div>{{ form.date_begin.label() }}</div><div>{{ form.date_begin }}</div></div>
-		<div class="big-field"><div>{{ form.date_end.label() }}</div><div>{{ form.date_end }}</div></div>
-		{{ form.submit(class='button') }}
-	</form>
-</aside>
-
 <main>
-	{% for event in events %}
-	<div class="event">
-		<img href="{{ event['file_path']}}" alt="Event">
+	<aside>
+		<header>
+			<h2>Search Events</h2>
+		</header>
+
+		<form action="/search" method="post">
+			{{ form.hidden_tag() }}
+			<div class="field"> {{ form.event_name(placeholder='Event')}}</div>
+			<div class="field"> {{ form.university_name(placeholder='University') }}</div>
+			<div class="big-field"> {{ form.event_type }}</div>
+			<div class="big-field"><div>{{ form.date_from.label() }}</div><div>{{ form.date_from }}</div></div>
+			<div class="big-field"><div>{{ form.date_to.label() }}</div><div>{{ form.date_to }}</div></div>
+			{{ form.submit(class='button') }}
+		</form>
+	</aside>
+
+	<div class="events-wrapper">
+		<div class="events"> {% for item in items %}
+			<div class="event">
+			<!-- <img href="{{ item['file_path']}}" alt="Event"> -->
+			<ul>
+				<li>{{ item.name }}</li>
+				<li>{{ item.description }}</li>
+				<li>{{ item.phone }}</li>
+				<li>Date: {{ item.datestamp }}</li>
+			</ul>
+			</div> {% endfor %} 
+		</div>
 	</div>
-	{% endfor %} 
 </main>
 {% endblock %}

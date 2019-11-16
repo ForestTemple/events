@@ -19,7 +19,7 @@
 	display: inline-block;
 	padding: 1em 2em; 
 	border: none;
-	margin: 0 2em 0;
+	margin: 0 0.5em 0;
 	background-color: var(--darkblue);
 	color: var(--white);
 	text-decoration: none;
@@ -63,21 +63,6 @@ nav {
 	justify-content: space-between;
 }
 
-.user-info {
+nav .user-info {
 	color: var(--white);
-}
-
-/*
-nav a {
-	display: inline-block;
-	padding: 1em 2em;
-	margin: 0 2em 0;
-	text-decoration: none;
-	background-color: var(--darkblue);
-	color: #fff;
-}
-*/
-
-nav strong {
-	color: darkgreen;
 }

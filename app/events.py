@@ -22,6 +22,19 @@ db = SQLAlchemy(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 
+class RSOCreateForm(FlaskForm):
+    name = StringField('Event Name', validators=[DataRequired(), Length(4, 50)])
+    university = SelectField(
+            'University', 
+            choices = [('impl', "Implement me")]
+    )
+    email1 = StringField('email1', validators=[DataRequired(), Email(), Length(4, 50)])
+    email2 = StringField('email2', validators=[DataRequired(), Email(), Length(4, 50)])
+    email3 = StringField('email3', validators=[DataRequired(), Email(), Length(4, 50)])
+    email4 = StringField('email4', validators=[DataRequired(), Email(), Length(4, 50)])
+    email5 = StringField('email5', validators=[DataRequired(), Email(), Length(4, 50)])
+    submit = SubmitField('Create')
+
 class SearchForm(FlaskForm):
     # Event name: Text
     # Event type: Drop-down {Public, Private, RSO} ONLY AUTHENTICATED
@@ -30,11 +43,11 @@ class SearchForm(FlaskForm):
     event_name = StringField('Event Name', validators=[Length(0, 500)])
     event_type = SelectField(
             'Event Type',
-            choices = [('all', 'All Events'), ('public', 'Public Events'), ('private', 'Private Events')]
+            choices = [('all', 'All Events'), ('public', 'Public Events'), ('private', 'Private Events'), ('rso', 'RSO Events')]
     )
     university_name = StringField('University Name', validators=[Length(0, 500)])
-    date_begin = DateField('From:', format='%Y-%m-%d')
-    date_end = DateField('To:', format='%Y-%m-%d')
+    date_from = DateField('From:', format='%Y-%m-%d', validators=[])
+    date_to = DateField('To:', format='%Y-%m-%d', validators=[])
     submit = SubmitField('Search!')
 
 class LoginForm(FlaskForm):
@@ -78,9 +91,8 @@ class Events(db.Model):
     email = db.Column('email', db.String(50), nullable=False)
     name = db.Column('name', db.String(100), nullable=False)
     description = db.Column('description', db.String(100))
+    lid = db.Column('lid', db.ForeignKey('locations.lid'), nullable=False)
     datestamp = db.Column('datestamp', db.DateTime, nullable=False)
-    location = db.relationship(
-            'Events_Locations', backref='events', lazy=True, uselist=False)
 
     def __init__(self, eid, email, name, description, datestamp):
         self.eid = eid
@@ -92,6 +104,8 @@ class Events(db.Model):
     def __repr__(self):
         return '<Event "{}: {}">'.format(self.eid, self.name)
 
+
+# collapse me to simple integer type in Users
 class Admins(db.Model):
     uid = db.Column('uid', db.Integer, db.ForeignKey('users.uid'), primary_key = True)
 
@@ -101,6 +115,7 @@ class Admins(db.Model):
     def __repr__(self):
         return '<Admin "{}">'.format(self.uid)
 
+# collapse me to simple integer type in Users
 class SuperAdmins(db.Model):
     uid = db.Column('uid', db.Integer, db.ForeignKey('users.uid'), primary_key = True)
 
@@ -112,29 +127,30 @@ class SuperAdmins(db.Model):
 
 class RSOs(db.Model):
     rid = db.Column('rid', db.Integer, primary_key=True)
+    uid = db.Column('uid', db.Integer, db.ForeignKey('users.uid'), nullable=False)
     name = db.Column('name', db.String(100), nullable=False)
 
-    def __init__(self, rid, name):
-        self.rid = rid
+    def __init__(self, uid, name):
+        self.uid = uid
         self.name = name
 
     def __repr__(self):
         return '<RSO "{}">'.format(self.name)
 
-class Events_Private(db.Model):
+class EventsPrivate(db.Model):
     eid = db.Column('eid', db.Integer, primary_key=True)
-    unid = db.Column('unid', db.Integer, db.ForeignKey('universities.unid'), nullable=False)
 
-    def __init__(self, eid, unid):
+    def __init__(self, eid):
         self.eid = eid
-        self.unid = unid
 
     def __repr__(self):
-        return '<EventsPrivate ({}, {})>'.format(self.eid, self.unid)
+        return '<EventsPrivate ({})>'.format(self.eid)
 
-class Events_RSO(db.Model):
+class EventsRSO(db.Model):
     eid = db.Column('eid', db.Integer, db.ForeignKey('events.eid'), primary_key=True)
     rid = db.Column('rid', db.Integer, db.ForeignKey('rsos.rid'), nullable=False)
+
+    __tablename__ = "events_rso"
 
     def __init__(self, eid, rid):
         self.eid = eid
@@ -142,6 +158,18 @@ class Events_RSO(db.Model):
 
     def __repr__(self):
         return '<EventsPrivate ({}, {})>'.format(self.eid, self.rid)
+
+class RSOs_Member(db.Model):
+    rid = db.Column('rid', db.Integer, db.ForeignKey('rsos.rid'), primary_key=True)
+    uid = db.Column('uid', db.Integer, 
+            db.ForeignKey('users.eid'), primary_key=True, nullable=False)
+
+    def __init__(self, rid, uid):
+        self.rid = rid
+        self.uid = uid
+
+    def __repr__(self):
+        return '<RSOMember (rid={}, uid={})>'.format(self.rid, self.uid)
 
 class Comments(db.Model):
     cid = db.Column('cid', db.Integer, primary_key=True)
@@ -151,8 +179,7 @@ class Comments(db.Model):
     honor = db.Column('honor', db.Integer)
     datestamp = db.Column('datestamp', db.DateTime)
 
-    def __init__(self, cid, eid, email, text, honor, datestamp):
-        self.cid = cid
+    def __init__(self, eid, email, text, honor, datestamp):
         self.eid = eid
         self.email = email
         self.text = text
@@ -160,20 +187,22 @@ class Comments(db.Model):
         self.datestamp = datestamp
 
     def __repr__(self):
-        return '<Comment (cid={}, eid={}, email="{}")>'.format(
-                self.cid, self.eid, self.email)
+        return '<Comment (eid={}, email="{}")>'.format(
+                self.eid, self.email)
 
 class Universities(db.Model):
     unid = db.Column('unid', db.Integer, primary_key=True)
-    num_students = db.Column('num_students', db.Integer)
     name = db.Column('name', db.String(100), nullable=False)
     description = db.Column('description', db.String(200))
+    lid = db.Column('lid', db.Integer, db.ForeignKey('locations.lid'), nullable=False) # update me
+    num_students = db.Column('num_students', db.Integer)
 
-    def __init__(self, unid, num_students, name, description):
+    def __init__(self, unid, name, description, lid, num_students):
         self.unid = unid
-        self.num_students = num_students
         self.name = name
         self.description = description
+        self.lid = lid
+        self.num_students = num_students
 
     def __repr__(self):
         return '<University "{}">'.format(self.name)
@@ -205,32 +234,6 @@ class Locations(db.Model):
         return '<Location (lat={}, lon={}, name="{}")>'.format(
                 self.latitude, self.longitude, self.name)
 
-class Universities_Locations(db.Model):
-    lid = db.Column('lid', db.Integer, primary_key=True)
-    unid = db.Column('unid', db.Integer, nullable=False)
-
-    def __init__(self, lid, unid):
-            self.lid = lid
-            self.unid = unid
-     
-    def __repr__(self):
-        return '<UniversityLocation (lid={}, unid={})>'.format(
-                self.lid, self.unid)
-
-class Events_Locations(db.Model):
-    lid = db.Column('lid', db.Integer, 
-            db.ForeignKey('locations.lid'), primary_key=True)
-    eid = db.Column('eid', db.Integer,
-            db.ForeignKey('events.eid'), nullable=False)
-
-    def __init__(self, lid, eid):
-            self.lid = lid
-            self.eid = eid
-     
-    def __repr__(self):
-        return '<EventsLocation (lid={}, eid={})>'.format(
-                self.lid, self.eid)
-
 @login_manager.user_loader
 def load_user(uid):
     return Users.query.get(int(uid))
@@ -249,7 +252,6 @@ def login():
     form = LoginForm()
     if form.validate_on_submit():
         user = Users.query.filter_by(email=form.email.data).first()
-        print("Got user login for " + str(user))
         if user is None or not user.check_password(form.password.data):
             flash('Invalid username or password')
             return redirect(url_for('login'))
@@ -275,7 +277,7 @@ def logout():
 @app.route('/profile', methods=['GET', 'POST'])
 def profile():
     if current_user.is_anonymous:
-        return redirect(url_for('home'))
+        return redirect(url_for('login'))
 
     if current_user.is_superadmin:
         print("superadmin")
@@ -284,21 +286,49 @@ def profile():
     else: 
         print("autheduser")
 
-@app.route('/create_rso', methods=['GET', 'POST'])
-def create_rso():
-    return render_template('create_rso.html')
+@app.route('/rso/create', methods=['GET', 'POST'])
+def rso_create():
+    if current_user.is_anonymous:
+        return redirect(url_for('login'))
 
-@app.route('/manage_rso', methods=['GET', 'POST'])
-def manage_rso():
-    return render_template('manage_rso.html')
+    form = RSOCreateForm()
+    if form.validate_on_submit():
+        name = form.name.data
+        emails = [
+                form.email1.data, form.email2.data,
+                form.email3.data, form.email4.data,
+                form.email5.data
+        ]
+        for email in emails:
+            if Users.query.filter_by(email=email).first() is None:
+                flash('Email "{}" is not signed up.'.format(email))
+                return redirect(url_for('rso_create'))
+        if RSOs.query.filter_by(name=name).first() is not None:
+                flash('That name is already taken.')
+                return redirect(url_for('rso_create'))
 
-@app.route('/create_university', methods=['GET', 'POST'])
-def create_university():
-    return render_template('create_university.html')
+        db.session.add(RSOs(current_user.get_id(), name))
+        db.session.commit()
+        for email in emails:
+            db.session.add(
+                RSOs_Member(RSOs.query.filter_by(name=name), 
+                Users.query.filter_by(email=email).first().uid)
+            )
+        db.session.commit()
+        return redirect(url_for('rso_manage'))
+    return render_template('rso/create.html', form=form)
 
-@app.route('/manage_universities', methods=['GET', 'POST'])
-def manage_universities():
-    return render_template('manage_universities.html')
+@app.route('/rso/manage', methods=['GET', 'POST'])
+def rso_manage():
+    return render_template('rso/manage.html')
+
+@app.route('/university/create', methods=['GET', 'POST'])
+def university_create():
+    return render_template('university/create.html')
+
+@app.route('/university/manage', methods=['GET', 'POST'])
+def university_manage():
+    return render_template('university/manage.html')
 
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
@@ -324,9 +354,31 @@ def signup():
 def search():
     form = SearchForm()
     items = []
+    print('validating')
     if form.validate_on_submit():
-        pass
-       # TODO 
+        if form.event_type.data == 'public':
+            events = Events.query.all()
+            for e in events:
+                if EventsPrivate.query.filter_by(eid=e.eid).first() is None \
+                        and EventsRSO.query.filter_by(eid=e.eid).first() is None:
+                    items.append(e)
+        elif form.event_type.data == 'private':
+            private_events = EventsPrivate.query.all()
+            for p in private_events:
+                event = Events.query.filter_by(eid=p.eid).first()
+                if event is not None:
+                    items.append(event)
+        elif form.event_type.data == 'rso':
+            rso_events = EventsRSO.query.all()
+            for r in rso_events:
+                event = Events.query.filter_by(eid=r.eid).first()
+                if event is not None:
+                    items.append(event)
+        else: # All events.
+            items = Events.query.limit(10).all()
+
+    print('this was a ' + form.event_type.data) 
+    print("items: " + str(items))
     return render_template('search.html', form=form, items=items)
 
 if __name__ == '__main__':
