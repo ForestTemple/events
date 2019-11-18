@@ -14,11 +14,19 @@
 		<form action="/search" method="post">
 			{{ form.hidden_tag() }}
 			<div class="field"> {{ form.event_name(placeholder='Event')}}</div>
-			<div class="field"> {{ form.university_name(placeholder='University') }}</div>
+			<div class="field"> {{ form.university }}</div> 
 			<div class="big-field"> {{ form.event_type }}</div>
 			<div class="big-field"><div>{{ form.date_from.label() }}</div><div>{{ form.date_from }}</div></div>
 			<div class="big-field"><div>{{ form.date_to.label() }}</div><div>{{ form.date_to }}</div></div>
 			{{ form.submit(class='button') }}
+
+			<div class="form-errors">
+			{% for e in form.event_name.errors %} <p><em>e n{{ e }}</em></p> {% endfor %}
+			{% for e in form.university.errors %} <p><em>u {{ e }}</em></p> {% endfor %} 
+			{% for e in form.event_type.errors %} <p><em> et {{ e }}</em></p> {% endfor %}
+			{% for e in form.date_from.errors %} <p><em>df{{ e }}</em></p> {% endfor %}
+			{% for e in form.date_to.errors %} <p><em>dt{{ e }}</em></p> {% endfor %}
+			</div>
 		</form>
 	</aside>
 

@@ -12,20 +12,21 @@
 		<h2>Create RSO</h2> 
 	</header>
 
+	<div class="form">
 	<form action="/rso/create" method="post">
-		<div>{{ form.hidden_tag() }}</div>
-		<div>{{ form.name(placeholder='RSO Name') }}</div>
-		<div>{{ form.email1(placeholder='Student Email 1') }}</div>
-		<div>{{ form.email2(placeholder='Student Email 2') }}</div>
-		<div>{{ form.email3(placeholder='Student Email 3') }}</div>
-		<div>{{ form.email4(placeholder='Student Email 4') }}</div>
-		<div>{{ form.email5(placeholder='Student Email 5') }}</div>
-		<div>{{ form.submit(class='button') }}</div>
+		{{ form.hidden_tag() }}
+		{{ form.name(placeholder='RSO Name') }}
+		{{ form.university }}
+		{{ form.email1(placeholder='Student Email 1') }}
+		{{ form.email2(placeholder='Student Email 2') }}
+		{{ form.email3(placeholder='Student Email 3') }}
+		{{ form.email4(placeholder='Student Email 4') }}
+		{{ form.email5(placeholder='Student Email 5') }}
+		{{ form.submit(class='button') }}
 		{% if form.email1.errors or form.email2.errors or form.email3.errors  
 			or form.university.errors or form.email4.errors 
 			or form.email5.errors or form.name.errors %}
-		<div class="form-errors">
-			{% for e in form.name.errors %}<p><em>{{ e }}</em></p>{% endfor %}
+		<div class="form-errors"> {% for e in form.name.errors %}<p><em>{{ e }}</em></p>{% endfor %}
 			{% for e in form.email1.errors %}<p><em>{{ e }}</em></p>{% endfor %}
 			{% for e in form.email2.errors %}<p><em>{{ e }}</em></p>{% endfor %}
 			{% for e in form.email3.errors %}<p><em>{{ e }}</em></p>{% endfor %}
@@ -34,6 +35,7 @@
 		</div>
 		{% endif %}
 	</form>
+	</div>
 
 	{% with post_errors = get_flashed_messages() %}
 	{% if post_errors %}

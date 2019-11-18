@@ -1,0 +1,43 @@
+main {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: 35rem;
+}
+
+.form-box {
+	display: flex;
+	justify-content: space-around;
+	flex-direction: column;
+	align-items: center;
+	border: 1px solid darkgreen;
+	width: 45rem;
+	height: 30rem;
+	background-color: var(--green);
+}
+
+.form-inputs {
+	display: flex;
+	justify-content: space-around;
+	align-content: center;
+	height: 300px;
+} 
+
+.form-inputs .left {
+	display: flex;
+	flex-direction: column;
+}
+
+.form-box .button {
+	width: 100%;
+	margin: 0;
+}
+
+#map {
+	height: 100%;
+	width: 20rem;
+}
+
+.form-errors, .post-errors {
+	color: var(--red);
+}

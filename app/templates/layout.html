@@ -16,29 +16,30 @@
 		</a>
 	</header>
 	<nav>
-
 		<div class="controls-left">
-		{% if current_user.is_authenticated %}
+
+		{% if priv['authed'] %}
+
 		<a class="button" href="{{url_for('search')}}">Search</a>
-		{% if current_user.is_superadmin %}
+
+		{% if priv['superadmin'] %}
+		<a class="button" href="{{url_for('location_create')}}">Create Location</a>
 		<a class="button" href="{{url_for('university_manage')}}">Manage Universities</a>
 		<a class="button" href="{{url_for('university_create')}}">Create University</a>
 		{% endif %}
-		{% if current_user.is_admin %}
+
+		{% if priv['admin'] %}
 		<a class="button" href="{{url_for('rso_manage')}}">Manage RSO</a>
-		{% elif current_user.is_authenticated %}
+		{% else %}
 		<a class="button" href="{{url_for('rso_create')}}">Create RSO</a>
 		{% endif %}
+
 		{% endif %}
 		</div>
 		<div class="controls-right">
-			{% if current_user.is_authenticated %}
-			<span class="user-info">{{current_user}}
-			{% if current_user.is_admin or current_user.is_superadmin %}::&lt;{% endif %}
-			{% if current_user.is_admin %}Admin{% endif %}
-			{% if current_user.is_admin and current_user.is_admin %}, {% endif %}
-			{% if current_user.is_superadmin %} SuperAdmin {% endif %} 
-			{% if current_user.is_admin or current_user.is_superadmin %}&lt;{% endif %}
+			{% if priv['authed'] %}
+			<span class="user-info">{{priv['email']}}{% if priv['admin'] or priv['superadmin'] %}::&lt;{% endif %}{% if priv['admin'] %}Admin{% endif %}{% if priv['admin'] and priv['superadmin'] %}, {% endif %}
+			{% if priv['superadmin'] %}SuperAdmin{% endif %}{% if priv['admin'] or priv['superadmin'] %}&gt;{% endif %}
 			</span>
 			<a class="button" href="{{url_for('logout')}}">Logout</a>
 			{% else %}

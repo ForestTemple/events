@@ -11,26 +11,22 @@ main {
 	align-items: center;
 	border: 1px solid darkgreen;
 	width: 25rem;
-	height: 32rem;
+	height: 25rem;
 	margin-top: 3rem;
 	background-color: var(--green);
 }
 
-.form {
-	width: 90%;
-	height: 90%;
-}
-
-.form * {
-	width: 90%;
-}
-
-.form .button {
+.form-box .button {
+	width: 100%;
 	margin: 0;
 }
 
 .form-errors, .post-errors {
 	color: var(--red);
+}
+
+#location {
+	width: 100%;
 }
 
 .form textarea {

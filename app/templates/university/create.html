@@ -1,0 +1,45 @@
+{% extends "layout.html" %}
+
+{% block css %}
+<link rel="stylesheet" href="{{url_for('static', filename='css/university.css')}}">
+{% endblock %}
+
+{% block content %}
+<main>
+	<section class="form-box">
+	<header>
+		<h2>Create University</h2> 
+	</header>
+
+	<form action="/university/create" method="post">
+		<div>{{ form.hidden_tag() }}</div>
+		<div>{{ form.name(placeholder='University Name') }}</div>
+		<div>{{ form.location }}</div>
+		<div>{{ form.description(placeholder='Description', rows=10, cols=34) }}</div>
+		<div>{{ form.num_students(placeholder='Number of Students') }}</div>
+		<div>{{ form.submit(class='button') }}</div>
+
+		{% if form.name.errors or form.description.errors or form.num_students.errors %}
+		</div>
+		<div class="form-errors">
+			{% for e in form.name.errors %}<p><em>{{ e }}</em></p>{% endfor %}
+			{% for e in form.description.errors %}<p><em>{{ e }}</em></p>{% endfor %}
+			{% for e in form.num_students.errors %}<p><em>{{ e }}</em></p>{% endfor %}
+		</div>
+		{% endif %}
+	</form>
+
+	{% with post_errors = get_flashed_messages() %}
+	{% if post_errors %}
+	<div class="post-errors">
+		{% for e in post_errors %}
+		<p><em>{{ e }}</em></p>
+		{% endfor %}
+	</div>
+	{% endif %}
+	{% endwith %}
+
+	</section>
+</main>
+
+{% endblock %}

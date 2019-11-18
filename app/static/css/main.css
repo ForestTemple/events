@@ -17,9 +17,8 @@
 
 .button {
 	display: inline-block;
-	padding: 1em 2em; 
+	padding: 1rem 1.5rem; 
 	border: none;
-	margin: 0 0.5em 0;
 	background-color: var(--darkblue);
 	color: var(--white);
 	text-decoration: none;
@@ -54,6 +53,7 @@ body > header > a > h1 {
 
 nav {
 	display: flex; 
+	padding: 0 0.5rem 0;
 	border-bottom: 1px solid darkgreen;
 	border-left: 1px solid darkgreen;
 	border-right: 1px solid darkgreen;

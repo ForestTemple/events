@@ -8,11 +8,13 @@ from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, SelectField
+from wtforms import StringField, PasswordField, SubmitField, SelectField, TextAreaField, IntegerField
 from wtforms.fields.html5 import DateField
 from wtforms.validators import DataRequired, Email, Length
 
 from flask_login import LoginManager, UserMixin, current_user, login_user, logout_user
+
+import geocoder
 
 app = Flask(__name__)      
 app.secret_key = 'My very first predatory hawk scooped their prey off the palm tree in my garden yesterday morning at 10AM sharp.'
@@ -21,45 +23,6 @@ db = SQLAlchemy(app)
 
 login_manager = LoginManager()
 login_manager.init_app(app)
-
-class RSOCreateForm(FlaskForm):
-    name = StringField('Event Name', validators=[DataRequired(), Length(4, 50)])
-    university = SelectField(
-            'University', 
-            choices = [('impl', "Implement me")]
-    )
-    email1 = StringField('email1', validators=[DataRequired(), Email(), Length(4, 50)])
-    email2 = StringField('email2', validators=[DataRequired(), Email(), Length(4, 50)])
-    email3 = StringField('email3', validators=[DataRequired(), Email(), Length(4, 50)])
-    email4 = StringField('email4', validators=[DataRequired(), Email(), Length(4, 50)])
-    email5 = StringField('email5', validators=[DataRequired(), Email(), Length(4, 50)])
-    submit = SubmitField('Create')
-
-class SearchForm(FlaskForm):
-    # Event name: Text
-    # Event type: Drop-down {Public, Private, RSO} ONLY AUTHENTICATED
-    # University: Text  # nickname table for uni?
-    # Date: DatePicker.html
-    event_name = StringField('Event Name', validators=[Length(0, 500)])
-    event_type = SelectField(
-            'Event Type',
-            choices = [('all', 'All Events'), ('public', 'Public Events'), ('private', 'Private Events'), ('rso', 'RSO Events')]
-    )
-    university_name = StringField('University Name', validators=[Length(0, 500)])
-    date_from = DateField('From:', format='%Y-%m-%d', validators=[])
-    date_to = DateField('To:', format='%Y-%m-%d', validators=[])
-    submit = SubmitField('Search!')
-
-class LoginForm(FlaskForm):
-    email = StringField('email', validators=[DataRequired(), Email(), Length(4, 50)])
-    password = PasswordField('password', validators=[DataRequired(), Length(6, 50)])
-    login = SubmitField()
-
-class SignupForm(FlaskForm): # TODO When a form goes bad, it doesn't tell you what field is wrong.
-    email = StringField('email', validators=[DataRequired(), Email(), Length(4, 50)])
-    name = StringField('name', validators=[DataRequired(), Length(1, 20)])
-    password = PasswordField('password', validators=[DataRequired(), Length(6, 50)])
-    signup = SubmitField()
 
 class Users(db.Model, UserMixin):
     uid = db.Column('uid', db.Integer, primary_key = True)
@@ -197,8 +160,7 @@ class Universities(db.Model):
     lid = db.Column('lid', db.Integer, db.ForeignKey('locations.lid'), nullable=False) # update me
     num_students = db.Column('num_students', db.Integer)
 
-    def __init__(self, unid, name, description, lid, num_students):
-        self.unid = unid
+    def __init__(self, name, description, lid, num_students):
         self.name = name
         self.description = description
         self.lid = lid
@@ -234,6 +196,72 @@ class Locations(db.Model):
         return '<Location (lat={}, lon={}, name="{}")>'.format(
                 self.latitude, self.longitude, self.name)
 
+class LocationCreateForm(FlaskForm):
+    name = StringField('Name', validators=[DataRequired(), Length(4, 50)])
+    description = TextAreaField('Description', validators=[DataRequired(), Length(4, 200)])
+    submit = SubmitField('Create')
+
+class UniversityCreateForm(FlaskForm):
+    name = StringField('Name', validators=[DataRequired(), Length(4, 50)])
+    location = SelectField('University', 
+            choices = [(l.lid, l.name) for l in Locations.query.all()]
+    )
+    description = TextAreaField('Description', validators=[DataRequired(), Length(4, 200)])
+    num_students = IntegerField('Number of Students')
+    submit = SubmitField('Create')
+
+
+class RSOCreateForm(FlaskForm):
+    name = StringField('Event Name', validators=[DataRequired(), Length(4, 50)])
+    university = SelectField('University', 
+            choices = [(u.unid, u.name) for u in Universities.query.all()]
+    )
+    email1 = StringField('email1', validators=[DataRequired(), Email(), Length(4, 50)])
+    email2 = StringField('email2', validators=[DataRequired(), Email(), Length(4, 50)])
+    email3 = StringField('email3', validators=[DataRequired(), Email(), Length(4, 50)])
+    email4 = StringField('email4', validators=[DataRequired(), Email(), Length(4, 50)])
+    email5 = StringField('email5', validators=[DataRequired(), Email(), Length(4, 50)])
+    submit = SubmitField('Create')
+
+
+class SearchForm(FlaskForm):
+    event_name = StringField('Event Name', validators=[Length(0, 500)])
+    event_type = SelectField(
+            'Event Type',
+            choices = [('all', 'All Events'), ('public', 'Public Events'), ('private', 'Private Events'), ('rso', 'RSO Events')]
+    )
+    university = SelectField('University', 
+            choices = [(u.unid, u.name) for u in Universities.query.all()]
+    )
+    date_from = DateField('From:', format='%Y-%m-%d', validators=[])
+    date_to = DateField('To:', format='%Y-%m-%d', validators=[])
+    submit = SubmitField('Search!')
+
+class LoginForm(FlaskForm):
+    email = StringField('email', validators=[DataRequired(), Email(), Length(4, 50)])
+    password = PasswordField('password', validators=[DataRequired(), Length(6, 50)])
+    login = SubmitField()
+
+class SignupForm(FlaskForm): # TODO When a form goes bad, it doesn't tell you what field is wrong.
+    email = StringField('email', validators=[DataRequired(), Email(), Length(4, 50)])
+    name = StringField('name', validators=[DataRequired(), Length(1, 20)])
+    password = PasswordField('password', validators=[DataRequired(), Length(6, 50)])
+    signup = SubmitField()
+
+def priv():
+    privs = dict()
+    if current_user.is_anonymous:
+        privs['email'] = 'Anonymous'
+        privs['authed'] = False
+        privs['admin'] = False
+        privs['superadmin'] = False
+    else:
+        privs['email'] = current_user.email
+        privs['authed'] = current_user.is_authenticated
+        privs['admin'] = Admins.query.filter_by(uid=current_user.get_id()).first() is not None
+        privs['superadmin'] = SuperAdmins.query.filter_by(uid=current_user.get_id()).first() is not None
+    return privs
+
 @login_manager.user_loader
 def load_user(uid):
     return Users.query.get(int(uid))
@@ -242,7 +270,7 @@ def load_user(uid):
 def home():
     if current_user.is_authenticated:
         return redirect(url_for('search'))
-    return render_template('home.html')
+    return render_template('home.html', priv=priv())
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -263,28 +291,12 @@ def login():
             Admins.query.filter_by(uid=cuid).first() is not None
         return redirect(url_for('search'))
     else:
-        print("not valid")
-        print(form.email.data, form.password.data)
-        return render_template('login.html', form=form)
+        return render_template('login.html', form=form, priv=priv())
 
 @app.route('/logout')
 def logout():
-    current_user.admin = False
-    current_user.superadmin = False 
     logout_user()
     return redirect(url_for('home'))
-
-@app.route('/profile', methods=['GET', 'POST'])
-def profile():
-    if current_user.is_anonymous:
-        return redirect(url_for('login'))
-
-    if current_user.is_superadmin:
-        print("superadmin")
-    elif current_user.is_admin:
-        print("admin")
-    else: 
-        print("autheduser")
 
 @app.route('/rso/create', methods=['GET', 'POST'])
 def rso_create():
@@ -293,6 +305,7 @@ def rso_create():
 
     form = RSOCreateForm()
     if form.validate_on_submit():
+        print('valid dude')
         name = form.name.data
         emails = [
                 form.email1.data, form.email2.data,
@@ -308,6 +321,7 @@ def rso_create():
                 return redirect(url_for('rso_create'))
 
         db.session.add(RSOs(current_user.get_id(), name))
+        db.session.add(Admins(current_user.get_id()))
         db.session.commit()
         for email in emails:
             db.session.add(
@@ -315,20 +329,58 @@ def rso_create():
                 Users.query.filter_by(email=email).first().uid)
             )
         db.session.commit()
+        print('done');
         return redirect(url_for('rso_manage'))
-    return render_template('rso/create.html', form=form)
+    print('not valid')
+    return render_template('rso/create.html', form=form, priv=priv())
 
 @app.route('/rso/manage', methods=['GET', 'POST'])
 def rso_manage():
-    return render_template('rso/manage.html')
+    return render_template('rso/manage.html', priv=priv())
+
+@app.route('/location/create', methods=['GET', 'POST'])
+def location_create():
+    #if Admins.query.filter_by(uid=current_user.get_id()).first() is None and \
+    #        SuperAdmins.query.filter_by(uid=current_user.get_id()).first() is None:
+    #    return redirect(url_for('login'))
+
+    current_user.location = geocoder.ip('me').latlng
+    if current_user.location is None:
+        current_user.location = [40.730610, -73.935242] # New York
+
+    form = LocationCreateForm()
+    if form.validate_on_submit():
+        if Locations.query.filter_by(name=form.name.data).first() is not None:
+            flash('A location already exists by that name.')
+            return render_template('location/create.html', form=form, priv=priv())
+        db.session.add(Locations(
+            form.name.data, 4.234, 43.232) # add description
+        )
+        db.session.commit()
+        flash('Successfully created.')
+    return render_template('location/create.html', form=form, priv=priv())
 
 @app.route('/university/create', methods=['GET', 'POST'])
 def university_create():
-    return render_template('university/create.html')
+    if current_user.is_anonymous: # change me to superadmin
+        return redirect(url_for('login'))
+
+    form = UniversityCreateForm()
+    if form.validate_on_submit():
+        if Universities.query.filter_by(name=form.name.data).first() is not None:
+            flash('A university already exists by that name.')
+            return render_template('university/create.html', form=form, priv=priv())
+        db.session.add(Universities(
+            form.name.data, form.description.data,
+            1, form.num_students.data)
+        )
+        db.session.commit()
+        flash('Successfully created.')
+    return render_template('university/create.html', form=form, priv=priv())
 
 @app.route('/university/manage', methods=['GET', 'POST'])
 def university_manage():
-    return render_template('university/manage.html')
+    return render_template('university/manage.html', priv=priv())
 
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
@@ -341,21 +393,20 @@ def signup():
         user = Users.query.filter_by(email=form.email.data).first()
         if user:
             flash('This email is already taken.')
-            print("Taken user: " + str(user))
             return redirect(url_for('signup'))
         new_user = Users(form.email.data, form.name.data, form.password.data)
         db.session.add(new_user)
         db.session.commit()
         login_user(new_user)
         return redirect(url_for('search'))
-    return render_template('signup.html', form=form)
+    return render_template('signup.html', form=form, priv=priv())
 
 @app.route('/search', methods=['GET', 'POST'])
 def search():
     form = SearchForm()
     items = []
-    print('validating')
     if form.validate_on_submit():
+        print("we're valid")
         if form.event_type.data == 'public':
             events = Events.query.all()
             for e in events:
@@ -375,11 +426,17 @@ def search():
                 if event is not None:
                     items.append(event)
         else: # All events.
-            items = Events.query.limit(10).all()
+            items = Events.query.all()
 
-    print('this was a ' + form.event_type.data) 
-    print("items: " + str(items))
-    return render_template('search.html', form=form, items=items)
+        print('made it, uni = {}, name = "{}"'.format(form.university.data, form.name.data))
+
+        if form.university.data != 1000:
+            items = items.filter_by(unid=form.university.data)
+        if form.name.data is not None:
+            items = items.filter_by(name=form.name.data)
+        # add date checking
+
+    return render_template('search.html', form=form, items=items, priv=priv())
 
 if __name__ == '__main__':
   app.run(debug=True)
