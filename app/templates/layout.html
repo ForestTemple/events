@@ -24,8 +24,9 @@
 
 		{% if priv['superadmin'] %}
 		<a class="button" href="{{url_for('location_create')}}">Create Location</a>
-		<a class="button" href="{{url_for('university_manage')}}">Manage Universities</a>
+		<a class="button" href="{{url_for('university_manage')}}">Manage University</a>
 		<a class="button" href="{{url_for('university_create')}}">Create University</a>
+		<a class="button" href="{{url_for('public_event_create')}}">New Public Event</a>
 		{% endif %}
 
 		{% if priv['admin'] %}

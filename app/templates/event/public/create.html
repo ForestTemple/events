@@ -1,0 +1,48 @@
+{% extends "layout.html" %}
+
+{% block css %}
+<link rel="stylesheet" href="{{url_for('static', filename='css/university.css')}}">
+{% endblock %}
+
+{% block content %}
+<main>
+	<section class="form-box">
+	<header>
+		<h2>Create Public Event</h2> 
+	</header>
+
+	<form action="/event/public/create" method="post">
+		<div>{{ form.hidden_tag() }}</div>
+		<div>{{ form.university }} </div>
+		<div>{{ form.location }}</div>
+		<div>{{ form.name(placeholder='Event Name') }}</div>
+		<div>{{ form.description(placeholder='Event Description', rows=5, cols=35) }}</div>
+		<div>{{ form.phone(placeholder='Phone Number') }}</div> 
+		<div>{{ form.datestamp.label() }} {{ form.datestamp }}</div>
+		<div>{{ form.submit(class='button') }}</div>
+		{% if form.university.errors or form.description.errors or form.location.errors
+			or form.name.errors or form.phone.errors or form.datestamp.errors %} 
+		<div class="form-errors">
+			{% for e in form.university.errors %}<p><em>University: {{ e }}</em></p>{% endfor %}
+			{% for e in form.location.errors %}<p><em>Location: {{ e }}</em></p>{% endfor %}
+			{% for e in form.name.errors %}<p><em>Name: {{ e }}</em></p>{% endfor %}
+			{% for e in form.phone.errors %}<p><em>Phone: {{ e }}</em></p>{% endfor %}
+			{% for e in form.datestamp.errors %}<p><em>Date: {{ e }}</em></p>{% endfor %}
+		</div>
+		{% endif %}
+	</form>
+
+	{% with post_errors = get_flashed_messages() %}
+	{% if post_errors %}
+	<div class="post-errors">
+		{% for e in post_errors %}
+		<p><em>{{ e }}</em></p>
+		{% endfor %}
+	</div>
+	{% endif %}
+	{% endwith %}
+
+	</section>
+</main>
+
+{% endblock %}

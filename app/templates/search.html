@@ -31,14 +31,14 @@
 	</aside>
 
 	<div class="events-wrapper">
-		<div class="events"> {% for item in items %}
+		<div class="events"> {% for event in events %}
 			<div class="event">
-			<!-- <img href="{{ item['file_path']}}" alt="Event"> -->
+			<!-- <img href="{{ event['file_path']}}" alt="Event"> -->
 			<ul>
-				<li>{{ item.name }}</li>
-				<li>{{ item.description }}</li>
-				<li>{{ item.phone }}</li>
-				<li>Date: {{ item.datestamp }}</li>
+				<li>{{ event.name }}</li>
+				<li>{{ event.description }}</li>
+				<li>{{ event.phone }}</li>
+				<li>Date: {{ event.datestamp }}</li>
 			</ul>
 			</div> {% endfor %} 
 		</div>

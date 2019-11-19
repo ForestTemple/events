@@ -51,16 +51,20 @@ class Users(db.Model, UserMixin):
 
 class Events(db.Model):
     eid = db.Column('eid', db.Integer, primary_key = True)
+    unid = db.Column('unid', db.Integer, db.ForeignKey('universities.unid')) # add me 
     email = db.Column('email', db.String(50), nullable=False)
     name = db.Column('name', db.String(100), nullable=False)
+    phone = db.Column('phone', db.String(30))
     description = db.Column('description', db.String(100))
     lid = db.Column('lid', db.ForeignKey('locations.lid'), nullable=False)
     datestamp = db.Column('datestamp', db.DateTime, nullable=False)
 
-    def __init__(self, eid, email, name, description, datestamp):
-        self.eid = eid
+    def __init__(self, unid, email, name, phone, description, location, datestamp):
+        self.unid = unid
         self.email = email
         self.name = name
+        self.phone = phone
+        self.lid = location
         self.description = description
         self.datestamp = datestamp
 
@@ -196,6 +200,19 @@ class Locations(db.Model):
         return '<Location (lat={}, lon={}, name="{}")>'.format(
                 self.latitude, self.longitude, self.name)
 
+class PublicEventCreateForm(FlaskForm):
+    university = SelectField('University', 
+            choices = [(str(u.unid), u.name) for u in Universities.query.all()]
+    )
+    location = SelectField('Location', 
+            choices = [(str(l.lid), l.name) for l in Locations.query.all()]
+    )
+    name = StringField('Name', validators=[DataRequired(), Length(4, 50)])
+    description = TextAreaField('Description', validators=[DataRequired(), Length(4, 200)])
+    phone = StringField('Name', validators=[DataRequired(), Length(6, 20)])
+    datestamp = DateField('Date:', format='%Y-%m-%d', default=datetime.today, validators=[DataRequired()])
+    submit = SubmitField('Create')
+
 class LocationCreateForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired(), Length(4, 50)])
     description = TextAreaField('Description', validators=[DataRequired(), Length(4, 200)])
@@ -231,10 +248,10 @@ class SearchForm(FlaskForm):
             choices = [('all', 'All Events'), ('public', 'Public Events'), ('private', 'Private Events'), ('rso', 'RSO Events')]
     )
     university = SelectField('University', 
-            choices = [(u.unid, u.name) for u in Universities.query.all()]
+            choices = [('0', 'Any')] + [(str(u.unid), u.name) for u in Universities.query.all()]
     )
-    date_from = DateField('From:', format='%Y-%m-%d', validators=[])
-    date_to = DateField('To:', format='%Y-%m-%d', validators=[])
+    date_from = DateField('From:', format='%Y-%m-%d', default=datetime.today, validators=[DataRequired()])
+    date_to = DateField('To:', format='%Y-%m-%d', default=datetime.today, validators=[DataRequired()])
     submit = SubmitField('Search!')
 
 class LoginForm(FlaskForm):
@@ -298,6 +315,31 @@ def logout():
     logout_user()
     return redirect(url_for('home'))
 
+@app.route('/event/public/create', methods=['GET', 'POST'])
+def public_event_create():
+    privs = priv()
+    if not privs['superadmin']:
+        return redirect(url_for('login'))
+
+    form = PublicEventCreateForm()
+    if form.validate_on_submit():
+        unid, location, name, phone, description, datestamp = \
+                (form.university.data, form.location.data, form.name.data,
+                form.phone.data, form.description.data, form.datestamp.data)
+        email = current_user.email
+
+        print(phone)
+        if Events.query.filter_by(name=name).first() is None: 
+            e = Events(int(unid), email, name, phone, description, location, datestamp)
+            print( e.phone)
+            db.session.add(e)
+            db.session.commit()
+            flash('Successfully created.')
+        else:
+            flash('Duplicate event, try again with new name.')
+
+    return render_template('event/public/create.html', form=form, priv=privs)
+
 @app.route('/rso/create', methods=['GET', 'POST'])
 def rso_create():
     if current_user.is_anonymous:
@@ -305,7 +347,6 @@ def rso_create():
 
     form = RSOCreateForm()
     if form.validate_on_submit():
-        print('valid dude')
         name = form.name.data
         emails = [
                 form.email1.data, form.email2.data,
@@ -329,9 +370,7 @@ def rso_create():
                 Users.query.filter_by(email=email).first().uid)
             )
         db.session.commit()
-        print('done');
         return redirect(url_for('rso_manage'))
-    print('not valid')
     return render_template('rso/create.html', form=form, priv=priv())
 
 @app.route('/rso/manage', methods=['GET', 'POST'])
@@ -404,39 +443,40 @@ def signup():
 @app.route('/search', methods=['GET', 'POST'])
 def search():
     form = SearchForm()
-    items = []
+
+    events = []
     if form.validate_on_submit():
-        print("we're valid")
         if form.event_type.data == 'public':
             events = Events.query.all()
             for e in events:
                 if EventsPrivate.query.filter_by(eid=e.eid).first() is None \
                         and EventsRSO.query.filter_by(eid=e.eid).first() is None:
-                    items.append(e)
+                    events.append(e)
         elif form.event_type.data == 'private':
             private_events = EventsPrivate.query.all()
             for p in private_events:
                 event = Events.query.filter_by(eid=p.eid).first()
                 if event is not None:
-                    items.append(event)
+                    events.append(event)
         elif form.event_type.data == 'rso':
             rso_events = EventsRSO.query.all()
             for r in rso_events:
                 event = Events.query.filter_by(eid=r.eid).first()
                 if event is not None:
-                    items.append(event)
+                    events.append(event)
         else: # All events.
-            items = Events.query.all()
+            events = Events.query.all()
 
-        print('made it, uni = {}, name = "{}"'.format(form.university.data, form.name.data))
+        if form.university.data != '0':
+            events = [e for e in events if e.university == form.university.data] # fix
+        if form.event_name.data:
+            events = [e for e in events if form.event_name.data in e.name \
+                    or form.event_name.data in e.description]
+        events = [e for e in events if form.date_from.data <= e.datestamp \
+                and form.date_to.data >= e.datestamp]
 
-        if form.university.data != 1000:
-            items = items.filter_by(unid=form.university.data)
-        if form.name.data is not None:
-            items = items.filter_by(name=form.name.data)
-        # add date checking
+    return render_template('search.html', form=form, events=events, priv=priv())
 
-    return render_template('search.html', form=form, items=items, priv=priv())
-
-if __name__ == '__main__':
-  app.run(debug=True)
+app.run()
+#if __name__ == '__main__':
+#  app.run(debug=True)
