@@ -1,0 +1,4 @@
+#!/bin/sh
+echo Universities:
+psql events -c 'select * from universities;'
+

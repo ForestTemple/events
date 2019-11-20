@@ -5,26 +5,6 @@ CREATE TABLE Locations (
 	name VARCHAR(100)
 );
 
-CREATE TABLE Users (
-	uid SERIAL PRIMARY KEY,
-	email VARCHAR(50) UNIQUE NOT NULL,
-	name VARCHAR(50) NOT NULL,
-	hash VARCHAR(256) NOT NULL,
-	salt VARCHAR(128) NOT NULL
-);
-
-CREATE TABLE Admins (
-	uid INTEGER PRIMARY KEY,
-	FOREIGN KEY (uid) REFERENCES Users(uid)
-		ON DELETE CASCADE
-);
-
-CREATE TABLE Super_Admins (
-	uid INTEGER PRIMARY KEY,
-	FOREIGN KEY (uid) REFERENCES Users(uid)
-		ON DELETE CASCADE
-);
-
 CREATE TABLE Universities (
 	unid SERIAL PRIMARY KEY,
 	name VARCHAR(100) NOT NULL,
@@ -34,9 +14,38 @@ CREATE TABLE Universities (
 	FOREIGN KEY (lid) REFERENCES Locations
 );
 
+
+CREATE TABLE Users (
+	uid SERIAL PRIMARY KEY,
+	unid INTEGER,
+	email VARCHAR(50) UNIQUE NOT NULL,
+	name VARCHAR(50) NOT NULL,
+	hash VARCHAR(256) NOT NULL,
+	salt VARCHAR(128) NOT NULL,
+	FOREIGN KEY (unid) REFERENCES Universities(unid)
+);
+
+CREATE TABLE Super_Admins (
+	uid INTEGER PRIMARY KEY,
+	FOREIGN KEY (uid) REFERENCES Users(uid)
+		ON DELETE CASCADE
+);
+
+CREATE TABLE RSOs (
+	rid SERIAL PRIMARY KEY,
+	name VARCHAR(100) NOT NULL
+);
+
+CREATE TABLE Admins (
+	uid INTEGER PRIMARY KEY,
+	rid INTEGER, /* not null */
+	FOREIGN KEY (uid) REFERENCES Users(uid),
+	FOREIGN KEY (rid) REFERENCES RSOs(rid)
+);
+
 CREATE TABLE Universities_Pictures (
 	unid INTEGER,
-	file_path VARCHAR(50) PRIMARY KEY,
+	file_path VARCHAR(100) PRIMARY KEY,
 	FOREIGN KEY (unid) REFERENCES Universities(unid)
 		ON DELETE CASCADE
 );
@@ -48,7 +57,7 @@ CREATE TABLE Events (
 	name VARCHAR(100) NOT NULL,
 	lid INTEGER NOT NULL,
 	description VARCHAR(100),
-	phone VARCHAR(20),
+	phone VARCHAR(30),
 	datestamp DATE
 );
 
@@ -58,13 +67,6 @@ CREATE TABLE Events_Private (
 		ON DELETE CASCADE
 );
 
-CREATE TABLE RSOs (
-	rid SERIAL PRIMARY KEY,
-	uid INTEGER NOT NULL, 
-	name VARCHAR(100) NOT NULL,
-	/* add desc? */
-	FOREIGN KEY (uid) REFERENCES Admins(uid)
-);
 
 CREATE TABLE Events_RSO (
 	eid SERIAL PRIMARY KEY,
@@ -85,10 +87,11 @@ CREATE TABLE RSOs_Member ( /* New model */
 CREATE TABLE Comments (
 	cid SERIAL PRIMARY KEY,
 	eid INTEGER NOT NULL,
-	email VARCHAR(100) NOT NULL,
-	text VARCHAR(100) NOT NULL,
-	honor INTEGER,
+	uid INTEGER NOT NULL,
+	text VARCHAR(200) NOT NULL,
+	rating INTEGER,
 	datestamp DATE,
 	FOREIGN KEY (eid) REFERENCES Events(eid)
-		ON DELETE CASCADE
+		ON DELETE CASCADE,
+	FOREIGN KEY (uid) REFERENCES Users(uid)
 );

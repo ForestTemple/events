@@ -1,0 +1,11 @@
+#!/bin/sh
+
+echo All:
+psql events -c 'select * from events;'
+echo Public:
+psql events -c 'select * from events e where not e.name in ((select name from events_private p where p.eid = e.eid) union
+	(select name from events_rso r where r.eid = e.eid))'
+echo Private:
+psql events -c 'select * from events_private;'
+echo RSO:
+psql events -c 'select * from events_rso;'

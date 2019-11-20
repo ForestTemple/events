@@ -16,6 +16,7 @@
 		{{ form.hidden_tag() }}
 		{{ form.email(placeholder='Email') }}
 		{{ form.name(placeholder='Name') }}
+		{{ form.unid }}
 		{{ form.password(placeholder='Password') }}
 		{{ form.signup(class='button') }}
 		{% if form.email.errors or form.name.errors or form.password.errors %}

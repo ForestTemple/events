@@ -32,14 +32,15 @@
 
 	<div class="events-wrapper">
 		<div class="events"> {% for event in events %}
-			<div class="event">
-			<!-- <img href="{{ event['file_path']}}" alt="Event"> -->
+			<div class="event button">
+			<a href="/event/view/{{ event.eid }}">
 			<ul>
 				<li>{{ event.name }}</li>
 				<li>{{ event.description }}</li>
 				<li>{{ event.phone }}</li>
 				<li>Date: {{ event.datestamp }}</li>
 			</ul>
+			</a>
 			</div> {% endfor %} 
 		</div>
 	</div>

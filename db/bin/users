@@ -1,0 +1,6 @@
+#!/bin/sh
+./users
+echo
+./superadmins
+echo
+./admins

@@ -1,0 +1,4 @@
+#!/bin/sh
+if [ -z "$1" ]; then exit 1; fi
+psql events -c "insert into rsos (name) values ('$1');"
+if [ "$?" -eq 0 ]; then ./rsos; fi

@@ -8,12 +8,14 @@
 <main>
 	<section class="form-box">
 	<header>
-		<h2>Create Public Event</h2> 
+		<h2>{{title_pretty}}</h2> 
 	</header>
 
-	<form action="/event/public/create" method="post">
+	<form action="/event/create/{{title}}" method="post">
 		<div>{{ form.hidden_tag() }}</div>
+		{% if official %}
 		<div>{{ form.university }} </div>
+		{% endif %}
 		<div>{{ form.location }}</div>
 		<div>{{ form.name(placeholder='Event Name') }}</div>
 		<div>{{ form.description(placeholder='Event Description', rows=5, cols=35) }}</div>
@@ -23,7 +25,9 @@
 		{% if form.university.errors or form.description.errors or form.location.errors
 			or form.name.errors or form.phone.errors or form.datestamp.errors %} 
 		<div class="form-errors">
+			{% if official %}
 			{% for e in form.university.errors %}<p><em>University: {{ e }}</em></p>{% endfor %}
+			{% endif %}
 			{% for e in form.location.errors %}<p><em>Location: {{ e }}</em></p>{% endfor %}
 			{% for e in form.name.errors %}<p><em>Name: {{ e }}</em></p>{% endfor %}
 			{% for e in form.phone.errors %}<p><em>Phone: {{ e }}</em></p>{% endfor %}

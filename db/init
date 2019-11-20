@@ -1,0 +1,2 @@
+psql events -f create.sql
+psql events -f inputs.sql

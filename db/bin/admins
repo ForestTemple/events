@@ -1,0 +1,4 @@
+#!/bin/sh
+echo Admins:
+echo
+psql events -c 'select u.uid, u.email from users u, admins a where a.uid = u.uid;'

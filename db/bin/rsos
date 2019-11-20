@@ -1,0 +1,2 @@
+#!/bin/sh
+psql events -c 'select * from rsos;'

@@ -28,7 +28,6 @@ main .event {
 	color: white;
 	height: 10rem;
 	width: 16rem;
-	background-color: var(--green);
 	overflow: scroll;
 }
 
@@ -70,3 +69,15 @@ form .big-field {
 	padding: 5px 0px;
 	width: 15rem;
 }
+
+.event a {
+	text-decoration: none;
+	color: var(--white);
+	width: 100%;
+	height: 100%;
+}
+
+.event a:visited {
+	color: var(--white);
+}
+
